@@ -7,10 +7,11 @@
     "theme_color": "#1c1c1c",
     "icons": [
       {
-        "src": "whyai.png",
+        "src": "whyai-off.png",
         "sizes": "512x512",
         "type": "image/png"
       }
     ]
 
   }
+
