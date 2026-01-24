@@ -1,6 +1,6 @@
 {
     "name": "WhyAI - Offline",
-    "short_name": "WhyAI",
+    "short_name": "WhyAI - Offline",
     "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#1c1c1c",
@@ -12,4 +12,5 @@
         "type": "image/png"
       }
     ]
+
   }
