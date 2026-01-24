@@ -212,4 +212,10 @@
           border: none;
           */
       }
+
   }
+
+
+.btn-primary {
+   color: white !important;
+}
