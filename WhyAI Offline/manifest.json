@@ -1,0 +1,15 @@
+{
+    "name": "WhyAI - Offline",
+    "short_name": "WhyAI",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#1c1c1c",
+    "theme_color": "#1c1c1c",
+    "icons": [
+      {
+        "src": "whyai.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ]
+  }

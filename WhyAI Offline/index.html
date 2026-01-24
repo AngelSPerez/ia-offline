@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./wllama.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1c1c1c" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>| IA</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    
+    <script type="module" crossorigin src="./assets/index-BZ_wFqig.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-q-smNyI7.css">
+    
+    <link rel="stylesheet" href="./custom-whyai.css">
+
+    <style>
+      /* --- 1. OVERLAYS VISUALES (TÃTULO Y FOOTER) --- */
+      
+      #fake-title-overlay {
+        position: fixed; 
+        top: 0; 
+        left: 0; 
+        z-index: 9998;
+        
+        /* Ajustes Desktop */
+        height: 62px;
+        margin-left: 15px;
+        padding: 0 16px; 
+        display: flex; 
+        align-items: center;
+        /* AlineaciÃ³n a la izquierda */
+        justify-content: flex-start; 
+        gap: 15px; /* Espacio entre el botÃ³n y el tÃ­tulo */
+        
+        background-color: #1c1c1c; 
+        min-width: 200px; 
+        pointer-events: none; 
+        
+        transition: opacity 0.3s ease, visibility 0.3s;
+      }
+
+      /* El contenido interactivo debe capturar clicks */
+      #fake-title-overlay > * {
+        pointer-events: auto;
+      }
+
+      #fake-title-overlay h1 {
+        color: #ececec; 
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-weight: bold; 
+        font-size: 1.25rem; 
+        margin: 0;
+        pointer-events: none;
+      }
+      
+      /* BotÃ³n Hamburguesa (Ahora a la izquierda) */
+      .hamburger-btn {
+        background: transparent;
+        border: none;
+        color: #ececec;
+        cursor: pointer;
+        padding: 8px;
+        /* Quitamos mÃ¡rgenes manuales, usamos gap en el padre */
+        margin: 0; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+      }
+      .hamburger-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: currentColor;
+      }
+      .hamburger-btn:hover {
+        background-color: rgba(255,255,255,0.1);
+      }
+
+      #fake-footer-overlay {
+        position: fixed; 
+        bottom: 0; 
+        left: 0; 
+        width: 80%; 
+        height: 40px;
+        background-color: #1c1c1c; 
+        z-index: 3; 
+        display: flex;
+        justify-content: center; 
+        align-items: center; 
+        pointer-events: none;
+        margin-left: 18%;
+        transition: background-color 0.3s;
+      }
+
+      #fake-footer-overlay p {
+        color: #888; 
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.75rem; 
+        margin: 0; 
+        opacity: 0.8;
+      }
+
+      /* --- AJUSTES MÃ"VILES --- */
+      @media (max-width: 1028px) {
+        #fake-title-overlay {
+           background-color: #1d232a !important; 
+           margin-left: 0 !important; 
+           width: 100% !important; 
+           box-sizing: border-box; 
+        }
+        
+        #fake-footer-overlay {
+           background-color: #1d232a !important; 
+           width: 100% !important;
+           margin-left: 0 !important;
+        }
+      }
+
+      /* --- 2. MODAL DE BIENVENIDA / AVISO --- */
+      .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 100000;
+        display: flex; justify-content: center; align-items: center;
+        backdrop-filter: blur(5px);
+        opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+      }
+      
+      .modal-overlay.active {
+        opacity: 1; visibility: visible;
+      }
+
+      .modal-box {
+        background: #2a2a2a; border: 1px solid #444;
+        padding: 25px; border-radius: 12px; max-width: 90%; width: 450px;
+        text-align: center; color: #ececec;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      }
+
+      .modal-box h2 { margin-top: 0; color: #fff; }
+      .modal-box p { color: #ccc; line-height: 1.5; font-size: 0.95rem; }
+      
+      .model-recommendation {
+        background: #1c1c1c; padding: 15px; border-radius: 8px;
+        margin: 15px 0; border: 1px solid #444;
+      }
+
+      .model-option {
+        margin-bottom: 12px;
+        padding: 12px;
+        background: #1a1a1a;
+        border-radius: 6px;
+        border-left: 3px solid #666;
+      }
+
+      .model-option:last-child {
+        margin-bottom: 0;
+      }
+
+      .model-name {
+        color: #4ade80;
+        font-weight: bold;
+        font-family: monospace;
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 5px;
+      }
+
+      .model-specs {
+        font-size: 0.85rem;
+        color: #aaa;
+        line-height: 1.4;
+        text-align: left;
+      }
+
+      .speed-indicator {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 5px;
+      }
+
+      .speed-slow { background: #3b3b2f; color: #e3d550; }
+      .speed-fast { background: #2f3b2f; color: #50e380; }
+
+      .close-btn {
+        background: #ececec; color: #1c1c1c; border: none;
+        padding: 10px 20px; border-radius: 6px; font-weight: bold;
+        cursor: pointer; margin-top: 15px; width: 100%;
+        transition: background 0.2s;
+      }
+      .close-btn:hover { background: #fff; }
+
+    </style>
+  </head>
+  <body>
+    
+    <div id="welcome-modal" class="modal-overlay">
+      <div class="modal-box">
+        <h2>⚠️ Versión de Prueba</h2>
+        <p>Esta es una función experimental, por lo que puede ser lenta la primera vez.</p>
+        
+        <div class="model-recommendation">
+          <p style="margin: 0 0 12px 0; font-size: 0.85rem; color: #999;">Elige un modelo:</p>
+          
+          <div class="model-option">
+            <span class="model-name">Gemma 2 2B</span>
+            <div class="model-specs">
+              <span>🧠 Más lento pero más inteligente. Mejor para respuestas complejas.</span>
+              <span class="speed-indicator speed-slow">Velocidad: Lenta</span>
+            </div>
+          </div>
+
+          <div class="model-option">
+            <span class="model-name">Llama 3.2 1B</span>
+            <div class="model-specs">
+              <span>⚡ Más rápido pero más básico. Ideal para respuestas rápidas.</span>
+              <span class="speed-indicator speed-fast">Velocidad: Rápida</span>
+            </div>
+          </div>
+        </div>
+
+        <p style="font-size: 0.8rem; opacity: 0.8;">
+          Debes descargar el modelo usando internet. Después podrás usar WhyAI totalmente desconectado.
+        </p>
+
+        <button class="close-btn" onclick="cerrarModal()">Entendido</button>
+      </div>
+    </div>
+
+    <div id="fake-footer-overlay"><p>WhyAI can make mistakes. Check important information.</p></div>
+    
+    <div id="root"></div>
+    
+    <div class="credits">
+      🤖 Powered by <a href="https://bit.ly/poweredby23" target="_blank"><img src="power.png" alt="powered" width="130px" height="20px"></a>
+      <span style="font-size: 0.65rem; opacity: 0.7;">Creado por <strong>WhyAI</strong></span>
+    </div>
+
+    <script>
+      // --- 1. LÓGICA DEL TÍTULO FALSO ---
+      function ocultarHeader() {
+        // Solo permitir ocultar en móvil
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          const header = document.getElementById('fake-title-overlay');
+          // Ocultamos visualmente
+          header.style.opacity = '0';
+          header.style.visibility = 'hidden';
+        }
+      }
+
+      // --- 2. LÓGICA DEL MODAL Y MODELOS ---
+      function detectarDispositivo() {
+        // Función vacía ya que no necesitamos detectar dispositivo
+      }
+
+      function mostrarModal() {
+        const modal = document.getElementById('welcome-modal');
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 500);
+      }
+
+      function cerrarModal() {
+        document.getElementById('welcome-modal').classList.remove('active');
+      }
+
+      detectarDispositivo();
+      mostrarModal();
+
+      // --- 3. SCRIPT PARA REEMPLAZAR "wllama" POR "WhyAI" ---
+      function reemplazarWllama() {
+          // Obtener todos los nodos de texto del documento
+          const walker = document.createTreeWalker(
+              document.body,
+              NodeFilter.SHOW_TEXT,
+              null,
+              false
+          );
+
+          let node;
+          const nodesToModify = [];
+
+          // Recopilar todos los nodos que contienen "wllama"
+          while (node = walker.nextNode()) {
+              if (node.nodeValue && node.nodeValue.toLowerCase().includes('wllama')) {
+                  // Excluir el div de créditos
+                  if (!node.parentElement.closest('.credits')) {
+                      nodesToModify.push(node);
+                  }
+              }
+          }
+
+          // Reemplazar el texto en cada nodo
+          nodesToModify.forEach(node => {
+              // Reemplazar "wllama" (case-insensitive)
+              node.nodeValue = node.nodeValue.replace(/wllama/gi, 'WhyAI');
+          });
+
+          // También reemplazar en atributos de etiquetas (href, title, alt, etc.)
+          const allElements = document.querySelectorAll('*:not(.credits) *');
+          allElements.forEach(el => {
+              // Reemplazar en todos los atributos
+              Array.from(el.attributes).forEach(attr => {
+                  if (attr.value && attr.value.toLowerCase().includes('wllama')) {
+                      attr.value = attr.value.replace(/wllama/gi, 'WhyAI');
+                  }
+              });
+          });
+      }
+
+      // Ejecutar cuando el DOM esté listo
+      if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', reemplazarWllama);
+      } else {
+          reemplazarWllama();
+      }
+
+      // Ejecutar también después de que se carguen dinámicamente nuevos elementos
+      const observer = new MutationObserver(reemplazarWllama);
+      observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          characterData: true
+      });
+
+      // --- 4. SCRIPT DE LIMPIEZA DE INTERFAZ ---
+      function limpiarInterfaz() {
+          const menuItems = document.querySelectorAll('a, button, li');
+          const palabrasProhibidas = ['report bugs', 'debug log', 'open a issue', 'github', 'discord', 'guide'];
+          
+          menuItems.forEach(el => {
+              if (el.offsetParent !== null && el.innerText) {
+                  const texto = el.innerText.toLowerCase();
+                  if (palabrasProhibidas.some(palabra => texto.includes(palabra))) {
+                      el.style.display = 'none';
+                  }
+              }
+          });
+          if (document.title.includes('Wllama')) { document.title = "WhyAI"; }
+      }
+      setInterval(limpiarInterfaz, 100);
+
+      
+      // --- 5. REGISTRO DEL SERVICE WORKER (OFFLINE) ---
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(registration => {
+              console.log('WhyAI SW Registrado');
+            })
+            .catch(error => {
+              console.log('Error SW:', error);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
