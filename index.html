@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhyAI</title>
+    
+    <link rel="manifest" href="manifest.json">
+    
+    <meta name="theme-color" content="#181818">
+
+    <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
+
+    <link rel="icon" href="icons/512.png">
+
+    <link rel="stylesheet" href="high.css">
+
+    <style>
+      body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+      .iframe-container {
+        width: 100%;
+        height: 100%;
+      }
+      iframe {
+        border: none;
+      }
+
+      /* --- INDICADOR ONLINE --- */
+      #online-indicator {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 9999;
+        background-color: transparent;
+        border: 1px solid #888;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.85rem;
+        color: #ccc;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: border-color 0.2s, background-color 0.2s;
+        margin-right: 12%;
+      }
+
+      #online-indicator:hover {
+        border-color: #aaa;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      #online-indicator::before {
+        content: "●";
+        color: #4ade80;
+        font-size: 0.75rem;
+      }
+
+      @media (max-width: 1028px) {
+        #online-indicator {
+          top: 12px;
+          right: 12px;
+          font-size: 0.8rem;
+          padding: 5px 12px;
+          cursor: pointer;
+          margin-right: 0px;
+        }
+
+        .mode-option.disabled::after {
+          content: "✓";
+          position: absolute;
+          top: 8px;
+          right: 8px;
+          background: #4ade80;
+          color: #1a1a1a;
+          padding: 4px 8px;
+          border-radius: 4px;
+          font-size: 1rem;
+          font-weight: bold;
+        }
+
+        .mode-option.disabled[data-lang="es"]::after {
+          content: "✓";
+        }
+      }
+
+      /* --- MODAL SWITCH MODE --- */
+      .switch-modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 100001;
+        display: flex; justify-content: center; align-items: center;
+        backdrop-filter: blur(5px);
+        opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+      }
+      
+      .switch-modal-overlay.active {
+        opacity: 1; visibility: visible;
+      }
+
+      .switch-modal-box {
+        background: #2a2a2a; border: 1px solid #444;
+        padding: 20px; border-radius: 12px; max-width: 90%; width: 400px;
+        text-align: center; color: #ececec;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        margin: 20px;
+      }
+
+      .switch-modal-box h2 {
+        margin-top: 0; color: #fff; margin-bottom: 20px;
+      }
+
+      .mode-option {
+        margin-bottom: 15px;
+        padding: 16px;
+        background: #1a1a1a;
+        border-radius: 8px;
+        border: 1px solid #444;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+
+      .mode-option:last-child {
+        margin-bottom: 0;
+      }
+
+      .mode-option:hover {
+        border-color: #666;
+        background: #202020;
+      }
+
+      .mode-option.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #151515;
+        border-color: #333;
+      }
+
+      .mode-option.disabled:hover {
+        border-color: #333;
+        background: #151515;
+      }
+
+      .mode-option.disabled::after {
+        content: "✓ Current Mode";
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #4ade80;
+        color: #1a1a1a;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      .mode-option.disabled[data-lang="es"]::after {
+        content: "✓ Modo Actual";
+      }
+
+      @media (max-width: 1028px) {
+        .mode-option.disabled::after {
+          content: "✓" !important;
+          padding: 4px 8px !important;
+          font-size: 1rem !important;
+        }
+
+        .mode-option.disabled[data-lang="es"]::after {
+          content: "✓" !important;
+        }
+      }
+
+      .mode-option h3 {
+        margin: 0 0 8px 0;
+        font-size: 1.1rem;
+        color: #4ade80;
+      }
+
+      .mode-option p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #aaa;
+        line-height: 1.4;
+      }
+
+      .close-switch-btn {
+        background: transparent;
+        color: #888;
+        border: 1px solid #444;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: normal;
+        cursor: pointer;
+        margin-top: 15px;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        transition: all 0.2s;
+      }
+
+      .close-switch-btn:hover {
+        border-color: #666;
+        color: #ccc;
+      }
+
+      /* --- MODAL BIENVENIDA NUEVO USUARIO --- */
+      .welcome-modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 100002;
+        display: flex; justify-content: center; align-items: center;
+        backdrop-filter: blur(5px);
+        opacity: 0; visibility: hidden; transition: opacity 0.3s ease;
+      }
+      
+      .welcome-modal-overlay.active {
+        opacity: 1; visibility: visible;
+      }
+
+      .welcome-modal-box {
+        background: #2a2a2a; border: 1px solid #444;
+        padding: 15px;
+        border-radius: 12px;
+        max-width: 90%;
+        width: 450px;
+        text-align: center;
+        color: #ececec;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        margin: 15px;
+      }
+
+      .welcome-modal-box h2 {
+        margin-top: 0; color: #fff; margin-bottom: 15px; font-size: 1.5rem;
+      }
+
+      .welcome-modal-box p {
+        margin: 0 0 20px 0;
+        color: #ccc;
+        line-height: 1.6;
+        font-size: 1rem;
+      }
+
+      .welcome-modal-box .highlight {
+        color: #4ade80;
+        font-weight: bold;
+      }
+
+      .welcome-modal-box .button-highlight {
+        background: #1a1a1a;
+        padding: 12px;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #1e703c;
+        color: #4ade80;
+        font-size: 0.9rem;
+      }
+
+      .welcome-btn {
+        background: #4ade80;
+        color: #1a1a1a;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        transition: all 0.2s;
+      }
+
+      .welcome-btn:hover {
+        background: #5ae890;
+        transform: translateY(-2px);
+      }
+
+      .welcome-btn:active {
+        transform: translateY(0);
+      }
+
+      /* --- TOAST OFFLINE --- */
+      #offline-toast {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(42, 42, 42, 0.85);
+        backdrop-filter: blur(10px);
+        color: #ccc;
+        padding: 10px 18px;
+        border-radius: 20px;
+        border: 1px solid rgba(136, 136, 136, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.85rem;
+        z-index: 100003;
+        opacity: 0;
+        transition: all 0.4s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 90%;
+        text-align: center;
+      }
+
+      #offline-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      #offline-toast::before {
+        color: #888;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+      }
+
+      @media (max-width: 768px) {
+        #offline-toast {
+          bottom: 15px;
+          padding: 8px 16px;
+          font-size: 0.8rem;
+        }
+
+        #offline-toast::before {
+          font-size: 1.3rem;
+        }
+      }
+    </style>
+</head>
+<body>
+
+<div class="welcome-modal-overlay" id="welcome-modal">
+  <div class="welcome-modal-box">
+    <h2>¡Bienvenido a WhyAI!</h2>
+    <p>Esta IA tiene una <span class="highlight">versión sin conexión</span>. Si te interesa usarla sin internet:</p>
+    <div class="button-highlight">
+      Pulsa el botón de la esquina superior derecha
+    </div>
+    <p>Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.</p>
+    <button class="welcome-btn" onclick="cerrarWelcomeModal()" id="welcome-btn">Entendido</button>
+  </div>
+</div>
+
+<div class="switch-modal-overlay" id="switch-modal">
+  <div class="switch-modal-box">
+    <h2 id="switch-title">Switch Mode</h2>
+    
+    <div class="mode-option disabled" id="online-mode-option" onclick="">
+      <h3>🌐 Online Mode</h3>
+      <p id="online-desc">Connect to the internet for cloud-based features and updates.</p>
+    </div>
+
+    <div class="mode-option" onclick="irOffline()">
+      <h3>📱 Offline Mode</h3>
+      <p id="offline-desc">Use WhyAI completely offline with local models.</p>
+    </div>
+
+    <button class="close-switch-btn" onclick="cerrarSwitchModal()" id="close-switch-btn">Close</button>
+  </div>
+</div>
+
+<!-- Toast Offline -->
+<div id="offline-toast"></div>
+
+<div class="iframe-container">
+  <iframe src="https://whyia-chat221.vercel.app/" width="100%" height="100%"></iframe>
+</div>
+
+<div id="online-indicator" onclick="abrirSwitchModal()">Online Mode</div>
+
+<script>
+  const translations = {
+    es: {
+      switchTitle: "Cambiar Modo",
+      onlineDesc: "Conecta a internet para funciones basadas en la nube y actualizaciones.",
+      offlineDesc: "Usa WhyAI completamente offline con modelos locales.",
+      closeSwitchBtn: "Cerrar",
+      welcomeTitle: "¡Bienvenido a WhyAI!",
+      welcomeText: "Esta IA tiene una <span class=\"highlight\">versión sin conexión</span>. Si te interesa usarla sin internet:",
+      welcomeButton: "Pulsa el botón de la esquina superior derecha, despues de esta pantalla.",
+      welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
+      welcomeBtn: "Entendido",
+      offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado."
+    },
+    en: {
+      switchTitle: "Switch Mode",
+      onlineDesc: "Connect to the internet for cloud-based features and updates.",
+      offlineDesc: "Use WhyAI completely offline with local models.",
+      closeSwitchBtn: "Close",
+      welcomeTitle: "Welcome to WhyAI!",
+      welcomeText: "This AI has an <span class=\"highlight\">offline version</span>. If you're interested in using it without internet:",
+      welcomeButton: "Tap the button in the top right corner, after this screen.",
+      welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
+      welcomeBtn: "Got it",
+      offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it."
+    }
+  };
+
+  let currentLang = 'en';
+
+  async function detectarIdioma() {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      const country = data.country_code;
+      
+      const hispanicCountries = [
+        'ES', 'MX', 'AR', 'CO', 'PE', 'VE', 'CL', 'EC', 'BO', 'PY',
+        'UY', 'CU', 'DO', 'GT', 'HN', 'SV', 'NI', 'CR', 'PA', 'PR',
+        'GQ', 'BZ', 'PH'
+      ];
+      
+      const language = hispanicCountries.includes(country) ? 'es' : 'en';
+      aplicarIdioma(language);
+    } catch (error) {
+      console.log('No se pudo detectar el idioma por IP, intentando con idioma del navegador');
+      detectarIdiomaPorNavegador();
+    }
+  }
+
+  function detectarIdiomaPorNavegador() {
+    const userLang = navigator.language || navigator.userLanguage;
+    const language = userLang.toLowerCase().startsWith('es') ? 'es' : 'en';
+    console.log('Idioma detectado del navegador:', userLang, '-> usando:', language);
+    aplicarIdioma(language);
+  }
+
+  function aplicarIdioma(lang) {
+    currentLang = lang;
+    const t = translations[lang] || translations.en;
+    
+    document.getElementById('switch-title').textContent = t.switchTitle;
+    document.getElementById('online-desc').textContent = t.onlineDesc;
+    document.getElementById('offline-desc').textContent = t.offlineDesc;
+    document.getElementById('close-switch-btn').textContent = t.closeSwitchBtn;
+    
+    // Welcome modal
+    const welcomeTitle = document.querySelector('.welcome-modal-box h2');
+    const welcomeText = document.querySelectorAll('.welcome-modal-box p')[0];
+    const welcomeButtonDiv = document.querySelector('.button-highlight');
+    const welcomeFooter = document.querySelectorAll('.welcome-modal-box p')[1];
+    const welcomeBtn = document.getElementById('welcome-btn');
+    
+    welcomeTitle.textContent = lang === 'es' ? '¡Bienvenido a WhyAI!' : 'Welcome to WhyAI!';
+    welcomeText.innerHTML = t.welcomeText;
+    welcomeButtonDiv.innerHTML = ' ' + t.welcomeButton;
+    welcomeFooter.textContent = t.welcomeFooter;
+    welcomeBtn.textContent = t.welcomeBtn;
+    
+    if (lang === 'es') {
+      const indicator = document.getElementById('online-indicator');
+      if (indicator.textContent.includes('Online Mode')) {
+        indicator.textContent = 'Online Mode';
+      }
+      document.getElementById('online-mode-option').setAttribute('data-lang', 'es');
+    }
+  }
+
+  function detectarDispositivo() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      const indicator = document.getElementById('online-indicator');
+      indicator.style.cursor = 'pointer';
+      indicator.style.pointerEvents = 'auto';
+    }
+  }
+
+  function abrirSwitchModal() {
+    document.getElementById('switch-modal').classList.add('active');
+  }
+
+  function cerrarSwitchModal() {
+    document.getElementById('switch-modal').classList.remove('active');
+  }
+
+  function cerrarWelcomeModal() {
+    document.getElementById('welcome-modal').classList.remove('active');
+    localStorage.setItem('whyai-visited', 'true');
+  }
+
+  function mostrarWelcomeModal() {
+    const visitado = localStorage.getItem('whyai-visited');
+    if (!visitado) {
+      setTimeout(() => {
+        document.getElementById('welcome-modal').classList.add('active');
+      }, 500);
+    }
+  }
+
+  function irOffline() {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const baseUrl = 'offline.html';
+    window.location.href = baseUrl;
+  }
+
+  // Función para mostrar el toast offline
+  function mostrarToastOffline() {
+    const toast = document.getElementById('offline-toast');
+    const t = translations[currentLang] || translations.en;
+    toast.textContent = t.offlineToast;
+    toast.classList.add('show');
+    
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 5000); // Se oculta después de 5 segundos
+  }
+
+  // Detectar cuando se pierde la conexión
+  window.addEventListener('offline', () => {
+    console.log('Conexión perdida');
+    mostrarToastOffline();
+  });
+
+  // Detectar cuando se recupera la conexión
+  window.addEventListener('online', () => {
+    console.log('Conexión recuperada');
+    const toast = document.getElementById('offline-toast');
+    toast.classList.remove('show');
+  });
+
+  document.getElementById('switch-modal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      cerrarSwitchModal();
+    }
+  });
+
+  document.getElementById('welcome-modal').addEventListener('click', function(event) {
+    if (event.target === this) {
+      cerrarWelcomeModal();
+    }
+  });
+
+  detectarIdioma();
+  detectarDispositivo();
+  mostrarWelcomeModal();
+
+  // Registrar Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(registration => {
+          console.log('✅ Service Worker registrado correctamente:', registration.scope);
+        })
+        .catch(error => {
+          console.error('❌ Error al registrar Service Worker:', error);
+        });
+    });
+  }
+</script>
+
+</body>
+</html>
