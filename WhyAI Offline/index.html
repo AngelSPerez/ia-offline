@@ -525,8 +525,12 @@
           const language = hispanicCountries.includes(country) ? 'es' : 'en';
           aplicarIdioma(language);
         } catch (error) {
-          console.log('No se pudo detectar el idioma, usando inglés por defecto');
-          aplicarIdioma('en');
+          console.log('No se pudo detectar el idioma por IP, intentando con idioma del navegador');
+          // Fallback: usar el idioma del navegador
+          const browserLang = navigator.language || navigator.userLanguage;
+          const language = browserLang.toLowerCase().startsWith('es') ? 'es' : 'en';
+          console.log('Idioma detectado del navegador:', browserLang, '-> usando:', language);
+          aplicarIdioma(language);
         }
       }
 
