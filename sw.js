@@ -1,31 +1,49 @@
-const CACHE_NAME = 'whyai-cache-v8';
+const CACHE_NAME = 'whyai-cache-v1';
 const TIMEOUT = 5000;
+
+// ✅ Detectar la ruta base desde la ubicación del SW
+const SW_PATH = self.location.pathname;
+const BASE_PATH = SW_PATH.substring(0, SW_PATH.lastIndexOf('/'));
+
+// ✅ Función helper para construir URLs correctas
+function asset(path) {
+  // Si path ya tiene BASE_PATH, no lo agregues dos veces
+  if (path.startsWith(BASE_PATH)) return path;
+  // Si es raíz '/', solo retorna BASE_PATH
+  if (path === '/') return BASE_PATH + '/index.html';
+  // Caso normal: agregar BASE_PATH
+  return BASE_PATH + path;
+}
+
 const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/custom-whyai.css',
-  '/high.css',
-  '/install.html',
-  '/redirect.html',
-  '/offline.html',
-  '/build.sh',
-  '/assets/index-BZ_wFqjs.js',
-  '/assets/index-q-smNyl7.css',
-  '/assets/wllama-DTxmcCWH.wasm',
-  '/assets/wllama-JepyyGAC.wasm',
-  '/icons/192.png',
-  '/icons/512.png',
-  '/icons/logo192.png',
-  '/icons/logo512.png',
-  '/whyai.png',
-  '/icons/whyai-off.png',
-  '/power.png'
+  asset('/'),
+  asset('/index.html'),
+  asset('/manifest.json'),
+  asset('/custom-whyai.css'),
+  asset('/high.css'),
+  asset('/install.html'),
+  asset('/redirect.html'),
+  asset('/offline.html'),
+  asset('/build.sh'),
+  asset('/assets/index-BZ_wFqjs.js'),
+  asset('/assets/index-q-smNyl7.css'),
+  asset('/assets/wllama-DTxmcCWH.wasm'),
+  asset('/assets/wllama-JepyyGAC.wasm'),
+  asset('/icons/192.png'),
+  asset('/icons/512.png'),
+  asset('/icons/logo192.png'),
+  asset('/icons/logo512.png'),
+  asset('/whyai.png'),
+  asset('/icons/whyai-off.png'),
+  asset('/power.png')
 ];
 
 const IFRAME_DOMAIN = 'whyia-chat221.vercel.app';
 
-// INSTALL - Con detección de errores
+console.log('🔧 BASE_PATH detectado:', BASE_PATH);
+console.log('📁 Assets a cachear:', STATIC_ASSETS);
+
+// INSTALL
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
@@ -68,9 +86,9 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
   
-  // ✅ Solo cachear peticiones GET
+  // Solo cachear peticiones GET
   if (req.method !== 'GET') {
-    return; // Ignora HEAD, POST, etc. silenciosamente
+    return;
   }
   
   const isIframeResource = url.hostname === IFRAME_DOMAIN;
@@ -78,13 +96,10 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     Promise.race([
       fetch(req).then(res => {
-        // Solo cachear respuestas válidas
         if (res && (res.ok || res.type === 'opaque')) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => {
-            cache.put(req, clone).catch(() => {
-              // Ignora errores de caché silenciosamente
-            });
+            cache.put(req, clone).catch(() => {});
           });
           
           if (isIframeResource) {
@@ -106,7 +121,8 @@ self.addEventListener('fetch', e => {
         }
         
         if (req.mode === 'navigate' && !isIframeResource) {
-          return caches.match('/index.html');
+          // Intentar con index.html de la base
+          return caches.match(asset('/index.html'));
         }
         
         return undefined;
