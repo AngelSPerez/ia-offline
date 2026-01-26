@@ -617,7 +617,7 @@
       // --- 5. REGISTRO DEL SERVICE WORKER (OFFLINE) ---
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
+          navigator.serviceWorker.register('./ia-offline/sw.js')
             .then(registration => {
               console.log('WhyAI SW Registrado');
             })
@@ -631,3 +631,4 @@
 
 
 </html>
+
