@@ -83,7 +83,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   
-  const isIframeResource = url.hostname === IFRAME_DOMAIN';
+  const isIframeResource = url.hostname === IFRAME_DOMAIN;
   
   e.respondWith(
     Promise.race([
