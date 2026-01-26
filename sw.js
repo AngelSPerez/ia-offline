@@ -1,4 +1,4 @@
-const CACHE_NAME = 'whyai-cache-v2';
+const CACHE_NAME = 'whyai-cache-v1';
 const TIMEOUT = 5000;
 
 const SW_PATH = self.location.pathname;
@@ -74,11 +74,41 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// FETCH
+// FETCH - Con headers COOP/COEP para multi-threading
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
   
+  // ✅ Inyectar headers COOP/COEP para archivos HTML
+  if (url.origin === self.location.origin && req.destination === 'document') {
+    e.respondWith(
+      fetch(req).then(response => {
+        const newHeaders = new Headers(response.headers);
+        newHeaders.set('Cross-Origin-Embedder-Policy', 'require-corp');
+        newHeaders.set('Cross-Origin-Opener-Policy', 'same-origin');
+        
+        const newResponse = new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
+        
+        // Cachear la respuesta modificada
+        const clone = newResponse.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(req, clone).catch(() => {});
+        });
+        
+        return newResponse;
+      }).catch(() => {
+        // Fallback a caché si falla la red
+        return caches.match(req);
+      })
+    );
+    return;
+  }
+  
+  // Solo cachear peticiones GET
   if (req.method !== 'GET') {
     return;
   }
