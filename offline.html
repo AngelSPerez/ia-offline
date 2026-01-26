@@ -2,7 +2,6 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./wllama.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#1c1c1c" />
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -617,7 +616,7 @@
       // --- 5. REGISTRO DEL SERVICE WORKER (OFFLINE) ---
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./ia-offline/sw.js')
+          navigator.serviceWorker.register('./sw.js')
             .then(registration => {
               console.log('WhyAI SW Registrado');
             })
@@ -631,4 +630,5 @@
 
 
 </html>
+
 
