@@ -1,4 +1,4 @@
-const CACHE_NAME = 'whyai-cache-v4';
+const CACHE_NAME = 'whyai-cache-v8';
 const TIMEOUT = 5000;
 const STATIC_ASSETS = [
   '/',
@@ -25,14 +25,28 @@ const STATIC_ASSETS = [
 
 const IFRAME_DOMAIN = 'whyia-chat221.vercel.app';
 
-// INSTALL
+// INSTALL - Con detección de errores
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(c => c.addAll(STATIC_ASSETS))
-      .catch(err => {
-        console.warn('Error al cachear assets iniciales:', err);
-      })
+    caches.open(CACHE_NAME).then(async cache => {
+      console.log('📦 Iniciando cacheo de assets...');
+      
+      for (const asset of STATIC_ASSETS) {
+        try {
+          const response = await fetch(asset);
+          if (response.ok) {
+            await cache.put(asset, response);
+            console.log('✅ Cacheado:', asset);
+          } else {
+            console.warn('⚠️ Error HTTP', response.status, 'para:', asset);
+          }
+        } catch (err) {
+          console.error('❌ FALLO:', asset, '-', err.message);
+        }
+      }
+      
+      console.log('🎉 Instalación completada');
+    })
   );
   self.skipWaiting();
 });
@@ -54,10 +68,9 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
   
-  // ✅ SOLO cachear peticiones GET (ignorar HEAD, POST, etc.)
+  // ✅ Solo cachear peticiones GET
   if (req.method !== 'GET') {
-    console.log('⏭️ Ignorando petición', req.method, ':', req.url);
-    return; // Dejar que pase sin cachear
+    return; // Ignora HEAD, POST, etc. silenciosamente
   }
   
   const isIframeResource = url.hostname === IFRAME_DOMAIN;
@@ -65,13 +78,12 @@ self.addEventListener('fetch', e => {
   e.respondWith(
     Promise.race([
       fetch(req).then(res => {
-        // ✅ Solo intentar cachear si es GET y respuesta válida
+        // Solo cachear respuestas válidas
         if (res && (res.ok || res.type === 'opaque')) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => {
-            cache.put(req, clone).catch(err => {
-              // Ignorar errores silenciosamente
-              // (Ya no deberían aparecer errores de HEAD)
+            cache.put(req, clone).catch(() => {
+              // Ignora errores de caché silenciosamente
             });
           });
           
@@ -87,7 +99,6 @@ self.addEventListener('fetch', e => {
       )
     ])
     .catch(() => {
-      // OFFLINE o timeout → usa caché
       return caches.match(req).then(cached => {
         if (cached) {
           console.log('✅ Sirviendo desde caché:', req.url);
