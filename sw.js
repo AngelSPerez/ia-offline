@@ -1,4 +1,4 @@
-const CACHE_NAME = 'whyai-cache-v1';
+const CACHE_NAME = 'whyai-cache-v2';
 const TIMEOUT = 5000;
 
 const SW_PATH = self.location.pathname;
@@ -112,9 +112,30 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') {
     return;
   }
-  
+
   const isIframeResource = url.hostname === IFRAME_DOMAIN;
-  
+
+  // 🔥 IFRAME → NETWORK FIRST SIEMPRE
+  if (isIframeResource) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && (res.ok || res.type === 'opaque')) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(req, clone).catch(() => {});
+            });
+            console.log('🌐 Iframe network-first:', req.url);
+          }
+          return res;
+        })
+        .catch(() => {
+          return caches.match(req);
+        })
+    );
+    return;
+  }
+
   e.respondWith(
     Promise.race([
       fetch(req).then(res => {
@@ -123,12 +144,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE_NAME).then(cache => {
             cache.put(req, clone).catch(() => {});
           });
-          
-          if (isIframeResource) {
-            console.log('📦 Cacheando recurso del iframe:', req.url);
-          }
         }
-        
         return res;
       }),
       new Promise((_, reject) => 
@@ -142,7 +158,7 @@ self.addEventListener('fetch', e => {
           return cached;
         }
         
-        if (req.mode === 'navigate' && !isIframeResource) {
+        if (req.mode === 'navigate') {
           return caches.match(asset('/index.html'));
         }
         
