@@ -1,5 +1,5 @@
-const CACHE_NAME = 'whyai-cache-v2';
-const TIMEOUT = 5000; // 5 segundos para dar tiempo a iframes
+const CACHE_NAME = 'whyai-cache-v4';
+const TIMEOUT = 5000;
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -23,7 +23,6 @@ const STATIC_ASSETS = [
   '/power.png'
 ];
 
-// ✅ Dominio del iframe - cachear TODOS sus recursos
 const IFRAME_DOMAIN = 'whyia-chat221.vercel.app';
 
 // INSTALL
@@ -33,7 +32,6 @@ self.addEventListener('install', e => {
       .then(c => c.addAll(STATIC_ASSETS))
       .catch(err => {
         console.warn('Error al cachear assets iniciales:', err);
-        // Aún así continúa la instalación
       })
   );
   self.skipWaiting();
@@ -51,34 +49,35 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// FETCH - Agresivo para iframes cross-domain (RESTAURADO)
+// FETCH
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
   
-  // ✅ Detectar si es recurso del iframe
+  // ✅ SOLO cachear peticiones GET (ignorar HEAD, POST, etc.)
+  if (req.method !== 'GET') {
+    console.log('⏭️ Ignorando petición', req.method, ':', req.url);
+    return; // Dejar que pase sin cachear
+  }
+  
   const isIframeResource = url.hostname === IFRAME_DOMAIN;
   
   e.respondWith(
-    // Intenta red primero con timeout
     Promise.race([
       fetch(req).then(res => {
-        // ✅ Cachea TODO del iframe y recursos locales
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(req, clone).catch(err => {
-            // ✅ Silenciosamente ignora errores
-            // Esto permite que .wasm, .gguf y archivos grandes fallen sin romper el flujo
-            // Solo logea si NO es un error conocido
-            if (!err.message.includes('Failed to convert')) {
-              console.log('No se pudo cachear:', req.url, err.message);
-            }
+        // ✅ Solo intentar cachear si es GET y respuesta válida
+        if (res && (res.ok || res.type === 'opaque')) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(req, clone).catch(err => {
+              // Ignorar errores silenciosamente
+              // (Ya no deberían aparecer errores de HEAD)
+            });
           });
-        });
-        
-        // ✅ Log para verificar que se cachean recursos del iframe
-        if (isIframeResource) {
-          console.log('📦 Cacheando recurso del iframe:', req.url);
+          
+          if (isIframeResource) {
+            console.log('📦 Cacheando recurso del iframe:', req.url);
+          }
         }
         
         return res;
@@ -91,19 +90,14 @@ self.addEventListener('fetch', e => {
       // OFFLINE o timeout → usa caché
       return caches.match(req).then(cached => {
         if (cached) {
-          // ✅ Log cuando sirve desde caché
           console.log('✅ Sirviendo desde caché:', req.url);
           return cached;
         }
         
-        // ❌ NO redirigir a offline.html para recursos del iframe
-        // Si no hay caché para este recurso específico y es navegación local
         if (req.mode === 'navigate' && !isIframeResource) {
           return caches.match('/index.html');
         }
         
-        // ⚠️ Para recursos sin caché, retornar undefined
-        // (El navegador mostrará su propio error, pero el iframe seguirá funcionando)
         return undefined;
       });
     })
