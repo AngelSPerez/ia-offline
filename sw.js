@@ -1,22 +1,16 @@
-const CACHE_NAME = 'whyai-cache-v1';
+const CACHE_NAME = 'whyai-cache-v2';
 const TIMEOUT = 5000;
 
-// ✅ Detectar la ruta base desde la ubicación del SW
 const SW_PATH = self.location.pathname;
 const BASE_PATH = SW_PATH.substring(0, SW_PATH.lastIndexOf('/'));
 
-// ✅ Función helper para construir URLs correctas
 function asset(path) {
-  // Si path ya tiene BASE_PATH, no lo agregues dos veces
   if (path.startsWith(BASE_PATH)) return path;
-  // Si es raíz '/', solo retorna BASE_PATH
   if (path === '/') return BASE_PATH + '/index.html';
-  // Caso normal: agregar BASE_PATH
   return BASE_PATH + path;
 }
 
 const STATIC_ASSETS = [
-  asset('/'),
   asset('/index.html'),
   asset('/manifest.json'),
   asset('/custom-whyai.css'),
@@ -25,10 +19,10 @@ const STATIC_ASSETS = [
   asset('/redirect.html'),
   asset('/offline.html'),
   asset('/build.sh'),
-  asset('/assets/index-BZ_wFqjs.js'),
-  asset('/assets/index-q-smNyl7.css'),
+  asset('/assets/index-BZ_wFqig.js'),
+  asset('/assets/index-q-smNyI7.css'),
   asset('/assets/wllama-DTxmcCWH.wasm'),
-  asset('/assets/wllama-JepyyGAC.wasm'),
+  asset('/assets/wllama-JeypyGAC.wasm'),
   asset('/icons/192.png'),
   asset('/icons/512.png'),
   asset('/icons/logo192.png'),
@@ -41,7 +35,6 @@ const STATIC_ASSETS = [
 const IFRAME_DOMAIN = 'whyia-chat221.vercel.app';
 
 console.log('🔧 BASE_PATH detectado:', BASE_PATH);
-console.log('📁 Assets a cachear:', STATIC_ASSETS);
 
 // INSTALL
 self.addEventListener('install', e => {
@@ -86,12 +79,11 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
   
-  // Solo cachear peticiones GET
   if (req.method !== 'GET') {
     return;
   }
   
-  const isIframeResource = url.hostname === IFRAME_DOMAIN;
+  const isIframeResource = url.hostname === IFRAME_DOMAIN';
   
   e.respondWith(
     Promise.race([
@@ -121,7 +113,6 @@ self.addEventListener('fetch', e => {
         }
         
         if (req.mode === 'navigate' && !isIframeResource) {
-          // Intentar con index.html de la base
           return caches.match(asset('/index.html'));
         }
         
