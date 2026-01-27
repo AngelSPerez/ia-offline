@@ -1,5 +1,4 @@
 const CACHE_NAME = 'whyai-cache-v2';
-const TIMEOUT = 5000;
 
 const SW_PATH = self.location.pathname;
 const BASE_PATH = SW_PATH.substring(0, SW_PATH.lastIndexOf('/'));
@@ -40,23 +39,16 @@ console.log('🔧 BASE_PATH detectado:', BASE_PATH);
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      console.log('📦 Iniciando cacheo de assets...');
-      
+      console.log('📦 Cacheando assets estáticos...');
       for (const asset of STATIC_ASSETS) {
         try {
-          const response = await fetch(asset);
-          if (response.ok) {
-            await cache.put(asset, response);
+          const res = await fetch(asset);
+          if (res.ok) {
+            await cache.put(asset, res);
             console.log('✅ Cacheado:', asset);
-          } else {
-            console.warn('⚠️ Error HTTP', response.status, 'para:', asset);
           }
-        } catch (err) {
-          console.error('❌ FALLO:', asset, '-', err.message);
-        }
+        } catch {}
       }
-      
-      console.log('🎉 Instalación completada');
     })
   );
   self.skipWaiting();
@@ -74,96 +66,70 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// FETCH - Con headers COOP/COEP para multi-threading
+// FETCH — NETWORK FIRST GLOBAL
 self.addEventListener('fetch', e => {
   const req = e.request;
   const url = new URL(req.url);
-  
-  // ✅ Inyectar headers COOP/COEP para archivos HTML
-  if (url.origin === self.location.origin && req.destination === 'document') {
-    e.respondWith(
-      fetch(req).then(response => {
-        const newHeaders = new Headers(response.headers);
-        newHeaders.set('Cross-Origin-Embedder-Policy', 'require-corp');
-        newHeaders.set('Cross-Origin-Opener-Policy', 'same-origin');
-        
-        const newResponse = new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: newHeaders,
-        });
-        
-        // Cachear la respuesta modificada
-        const clone = newResponse.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(req, clone).catch(() => {});
-        });
-        
-        return newResponse;
-      }).catch(() => {
-        // Fallback a caché si falla la red
-        return caches.match(req);
-      })
-    );
-    return;
-  }
-  
-  // Solo cachear peticiones GET
-  if (req.method !== 'GET') {
-    return;
-  }
 
-  const isIframeResource = url.hostname === IFRAME_DOMAIN;
-
-  // 🔥 IFRAME → NETWORK FIRST SIEMPRE
-  if (isIframeResource) {
-    e.respondWith(
-      fetch(req)
-        .then(res => {
-          if (res && (res.ok || res.type === 'opaque')) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then(cache => {
-              cache.put(req, clone).catch(() => {});
-            });
-            console.log('🌐 Iframe network-first:', req.url);
-          }
-          return res;
-        })
-        .catch(() => {
-          return caches.match(req);
-        })
-    );
-    return;
-  }
+  // Solo GET
+  if (req.method !== 'GET') return;
 
   e.respondWith(
-    Promise.race([
-      fetch(req).then(res => {
-        if (res && (res.ok || res.type === 'opaque')) {
-          const clone = res.clone();
+    (async () => {
+      try {
+        // 🌐 INTENTO DE RED SIEMPRE
+        const response = await fetch(req);
+
+        // 🧠 Inyectar COOP/COEP SOLO en documentos del mismo origen
+        if (url.origin === self.location.origin && req.destination === 'document') {
+          const headers = new Headers(response.headers);
+          headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+          headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+
+          const modified = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+          });
+
+          const clone = modified.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(req, clone).catch(() => {});
           });
+
+          console.log('🌐 Documento desde RED:', req.url);
+          return modified;
         }
-        return res;
-      }),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Network timeout')), TIMEOUT)
-      )
-    ])
-    .catch(() => {
-      return caches.match(req).then(cached => {
+
+        // 📦 Cachear cualquier recurso válido (incluye iframe)
+        if (response.ok || response.type === 'opaque') {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(req, clone).catch(() => {});
+          });
+
+          if (url.hostname === IFRAME_DOMAIN) {
+            console.log('🌐 Iframe desde RED:', req.url);
+          }
+        }
+
+        return response;
+
+      } catch (err) {
+        // ❌ RED FALLÓ → USAR CACHE REAL
+        const cached = await caches.match(req);
         if (cached) {
-          console.log('✅ Sirviendo desde caché:', req.url);
+          console.warn('⚠️ Cache fallback:', req.url);
           return cached;
         }
-        
+
+        // Último recurso para navegación
         if (req.mode === 'navigate') {
           return caches.match(asset('/index.html'));
         }
-        
-        return undefined;
-      });
-    })
+
+        throw err;
+      }
+    })()
   );
 });
