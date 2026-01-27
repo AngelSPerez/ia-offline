@@ -1,4 +1,4 @@
-const CACHE_NAME = 'whyai-cache-v3';
+const CACHE_NAME = 'whyai-cache-v4';
 
 const SW_PATH = self.location.pathname;
 const BASE_PATH = SW_PATH.substring(0, SW_PATH.lastIndexOf('/'));
@@ -30,11 +30,9 @@ const STATIC_ASSETS = [
   asset('/power.png')
 ];
 
-const IFRAME_DOMAIN = 'whyia-chat221.vercel.app';
-
 // INSTALL
-self.addEventListener('install', event => {
-  event.waitUntil(
+self.addEventListener('install', e => {
+  e.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
       for (const a of STATIC_ASSETS) {
         try {
@@ -48,8 +46,8 @@ self.addEventListener('install', event => {
 });
 
 // ACTIVATE
-self.addEventListener('activate', event => {
-  event.waitUntil(
+self.addEventListener('activate', e => {
+  e.waitUntil(
     caches.keys().then(keys =>
       Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
@@ -57,46 +55,52 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// FETCH — NETWORK FIRST REAL
+// FETCH
 self.addEventListener('fetch', event => {
   const req = event.request;
+  const url = new URL(req.url);
 
   if (req.method !== 'GET') return;
+
+  // 🚫 EXCLUIR IPAPI (CORS)
+  if (url.hostname === 'ipapi.co') {
+    return; // deja que el navegador lo maneje
+  }
 
   event.respondWith(
     (async () => {
       try {
-        const networkResponse = await fetch(req);
+        const netRes = await fetch(req);
 
-        // ✅ SOLO navegación del mismo origen → headers
+        // ✅ COOP / COEP solo navegación mismo origen
         if (
           req.mode === 'navigate' &&
-          new URL(req.url).origin === self.location.origin
+          url.origin === self.location.origin
         ) {
-          const headers = new Headers(networkResponse.headers);
+          const headers = new Headers(netRes.headers);
           headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
           headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
-          return new Response(networkResponse.body, {
-            status: networkResponse.status,
-            statusText: networkResponse.statusText,
+          return new Response(netRes.body, {
+            status: netRes.status,
+            statusText: netRes.statusText,
             headers
           });
         }
 
-        // 📦 Cachear solo recursos seguros (NO documents)
+        // 📦 Cache solo mismo origen y no documentos
         if (
-          networkResponse.ok &&
+          url.origin === self.location.origin &&
+          netRes.ok &&
           req.destination !== 'document'
         ) {
           const cache = await caches.open(CACHE_NAME);
-          cache.put(req, networkResponse.clone()).catch(() => {});
+          cache.put(req, netRes.clone()).catch(() => {});
         }
 
-        return networkResponse;
+        return netRes;
 
-      } catch (err) {
-        // 🔻 SOLO si la red realmente falló
+      } catch {
         const cached = await caches.match(req);
         if (cached) return cached;
 
@@ -104,7 +108,7 @@ self.addEventListener('fetch', event => {
           return caches.match(asset('/offline.html'));
         }
 
-        throw err;
+        throw new Error('Network error');
       }
     })()
   );
