@@ -382,7 +382,6 @@
       onlineDesc: "Conecta a internet para funciones basadas en la nube y actualizaciones.",
       offlineDesc: "Usa WhyAI completamente offline con modelos locales.",
       closeSwitchBtn: "Cerrar",
-      welcomeTitle: "¡Bienvenido a WhyAI!",
       welcomeText: "Esta IA tiene una <span class=\"highlight\">versión sin conexión</span>. Si te interesa usarla sin internet:",
       welcomeButton: "Pulsa el botón de la esquina superior derecha, despues de esta pantalla.",
       welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
@@ -394,7 +393,6 @@
       onlineDesc: "Connect to the internet for cloud-based features and updates.",
       offlineDesc: "Use WhyAI completely offline with local models.",
       closeSwitchBtn: "Close",
-      welcomeTitle: "Welcome to WhyAI!",
       welcomeText: "This AI has an <span class=\"highlight\">offline version</span>. If you're interested in using it without internet:",
       welcomeButton: "Tap the button in the top right corner, after this screen.",
       welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
@@ -405,72 +403,31 @@
 
   let currentLang = 'en';
 
-  async function detectarIdioma() {
-    try {
-      const response = await fetch('https://ipapi.co/json/');
-      const data = await response.json();
-      const country = data.country_code;
-      
-      const hispanicCountries = [
-        'ES', 'MX', 'AR', 'CO', 'PE', 'VE', 'CL', 'EC', 'BO', 'PY',
-        'UY', 'CU', 'DO', 'GT', 'HN', 'SV', 'NI', 'CR', 'PA', 'PR',
-        'GQ', 'BZ', 'PH'
-      ];
-      
-      const language = hispanicCountries.includes(country) ? 'es' : 'en';
-      aplicarIdioma(language);
-    } catch (error) {
-      console.log('No se pudo detectar el idioma por IP, intentando con idioma del navegador');
-      detectarIdiomaPorNavegador();
-    }
-  }
-
-  function detectarIdiomaPorNavegador() {
-    const userLang = navigator.language || navigator.userLanguage;
+  // ✅ SOLO IDIOMA DEL NAVEGADOR
+  function detectarIdioma() {
+    const userLang = navigator.language || navigator.userLanguage || 'en';
     const language = userLang.toLowerCase().startsWith('es') ? 'es' : 'en';
-    console.log('Idioma detectado del navegador:', userLang, '-> usando:', language);
     aplicarIdioma(language);
   }
 
   function aplicarIdioma(lang) {
     currentLang = lang;
     const t = translations[lang] || translations.en;
-    
+
     document.getElementById('switch-title').textContent = t.switchTitle;
     document.getElementById('online-desc').textContent = t.onlineDesc;
     document.getElementById('offline-desc').textContent = t.offlineDesc;
     document.getElementById('close-switch-btn').textContent = t.closeSwitchBtn;
-    
-    // Welcome modal
-    const welcomeTitle = document.querySelector('.welcome-modal-box h2');
+
     const welcomeText = document.querySelectorAll('.welcome-modal-box p')[0];
     const welcomeButtonDiv = document.querySelector('.button-highlight');
     const welcomeFooter = document.querySelectorAll('.welcome-modal-box p')[1];
     const welcomeBtn = document.getElementById('welcome-btn');
-    
-    welcomeTitle.textContent = lang === 'es' ? '¡Bienvenido a WhyAI!' : 'Welcome to WhyAI!';
+
     welcomeText.innerHTML = t.welcomeText;
     welcomeButtonDiv.innerHTML = ' ' + t.welcomeButton;
     welcomeFooter.textContent = t.welcomeFooter;
     welcomeBtn.textContent = t.welcomeBtn;
-    
-    if (lang === 'es') {
-      const indicator = document.getElementById('online-indicator');
-      if (indicator.textContent.includes('Online Mode')) {
-        indicator.textContent = 'Online Mode';
-      }
-      document.getElementById('online-mode-option').setAttribute('data-lang', 'es');
-    }
-  }
-
-  function detectarDispositivo() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      const indicator = document.getElementById('online-indicator');
-      indicator.style.cursor = 'pointer';
-      indicator.style.pointerEvents = 'auto';
-    }
   }
 
   function abrirSwitchModal() {
@@ -487,8 +444,7 @@
   }
 
   function mostrarWelcomeModal() {
-    const visitado = localStorage.getItem('whyai-visited');
-    if (!visitado) {
+    if (!localStorage.getItem('whyai-visited')) {
       setTimeout(() => {
         document.getElementById('welcome-modal').classList.add('active');
       }, 500);
@@ -496,62 +452,27 @@
   }
 
   function irOffline() {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    const baseUrl = 'offline.html';
-    window.location.href = baseUrl;
+    window.location.href = 'offline.html';
   }
 
-  // Función para mostrar el toast offline
   function mostrarToastOffline() {
     const toast = document.getElementById('offline-toast');
-    const t = translations[currentLang] || translations.en;
-    toast.textContent = t.offlineToast;
+    toast.textContent = translations[currentLang].offlineToast;
     toast.classList.add('show');
-    
-    setTimeout(() => {
-      toast.classList.remove('show');
-    }, 5000); // Se oculta después de 5 segundos
+    setTimeout(() => toast.classList.remove('show'), 5000);
   }
 
-  // Detectar cuando se pierde la conexión
-  window.addEventListener('offline', () => {
-    console.log('Conexión perdida');
-    mostrarToastOffline();
-  });
-
-  // Detectar cuando se recupera la conexión
+  window.addEventListener('offline', mostrarToastOffline);
   window.addEventListener('online', () => {
-    console.log('Conexión recuperada');
-    const toast = document.getElementById('offline-toast');
-    toast.classList.remove('show');
-  });
-
-  document.getElementById('switch-modal').addEventListener('click', function(event) {
-    if (event.target === this) {
-      cerrarSwitchModal();
-    }
-  });
-
-  document.getElementById('welcome-modal').addEventListener('click', function(event) {
-    if (event.target === this) {
-      cerrarWelcomeModal();
-    }
+    document.getElementById('offline-toast').classList.remove('show');
   });
 
   detectarIdioma();
-  detectarDispositivo();
   mostrarWelcomeModal();
 
-  // Registrar Service Worker
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/ia-offline/sw.js')
-        .then(registration => {
-          console.log('✅ Service Worker registrado correctamente:', registration.scope);
-        })
-        .catch(error => {
-          console.error('❌ Error al registrar Service Worker:', error);
-        });
+      navigator.serviceWorker.register('/ia-offline/sw.js');
     });
   }
 </script>
@@ -559,3 +480,4 @@
 </body>
 
 </html>
+
