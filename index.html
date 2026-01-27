@@ -74,23 +74,6 @@
           cursor: pointer;
           margin-right: 0px;
         }
-
-        .mode-option.disabled::after {
-          content: "✓";
-          position: absolute;
-          top: 8px;
-          right: 8px;
-          background: #4ade80;
-          color: #1a1a1a;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 1rem;
-          font-weight: bold;
-        }
-
-        .mode-option.disabled[data-lang="es"]::after {
-          content: "✓";
-        }
       }
 
       /* --- MODAL SWITCH MODE --- */
@@ -152,8 +135,8 @@
         background: #151515;
       }
 
-      .mode-option.disabled::after {
-        content: "✓ Modo Actual";
+      /* Badge dinámico que se actualiza con JS */
+      .mode-option.disabled .current-badge {
         position: absolute;
         top: 8px;
         right: 8px;
@@ -165,19 +148,11 @@
         font-weight: bold;
       }
 
-      .mode-option.disabled[data-lang="es"]::after {
-        content: "✓ Modo Actual";
-      }
-
       @media (max-width: 1028px) {
-        .mode-option.disabled::after {
-          content: "✓" !important;
-          padding: 4px 8px !important;
-          font-size: 1rem !important;
-        }
-
-        .mode-option.disabled[data-lang="es"]::after {
-          content: "✓" !important;
+        .mode-option.disabled .current-badge {
+          content: "✓";
+          padding: 4px 8px;
+          font-size: 1rem;
         }
       }
 
@@ -355,6 +330,7 @@
     <h2 id="switch-title">Switch Mode</h2>
     
     <div class="mode-option disabled" id="online-mode-option" onclick="">
+      <span class="current-badge" id="current-mode-badge">Current Mode</span>
       <h3>🌐 Online Mode</h3>
       <p id="online-desc">Connect to the internet for cloud-based features and updates.</p>
     </div>
@@ -384,6 +360,8 @@
       onlineDesc: "Conecta a internet para funciones basadas en la nube y actualizaciones.",
       offlineDesc: "Usa WhyAI completamente offline con modelos locales.",
       closeSwitchBtn: "Cerrar",
+      currentModeBadge: "✓ Modo Actual",
+      currentModeBadgeMobile: "✓",
       welcomeText: "Esta IA tiene una <span class=\"highlight\">versión sin conexión</span>. Si te interesa usarla sin internet:",
       welcomeButton: "Pulsa el botón de la esquina superior derecha, despues de esta pantalla.",
       welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
@@ -395,6 +373,8 @@
       onlineDesc: "Connect to the internet for cloud-based features and updates.",
       offlineDesc: "Use WhyAI completely offline with local models.",
       closeSwitchBtn: "Close",
+      currentModeBadge: "✓ Current Mode",
+      currentModeBadgeMobile: "✓",
       welcomeText: "This AI has an <span class=\"highlight\">offline version</span>. If you're interested in using it without internet:",
       welcomeButton: "Tap the button in the top right corner, after this screen.",
       welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
@@ -421,6 +401,11 @@
     document.getElementById('offline-desc').textContent = t.offlineDesc;
     document.getElementById('close-switch-btn').textContent = t.closeSwitchBtn;
 
+    // ✅ ACTUALIZAR EL BADGE DINÁMICAMENTE
+    const badge = document.getElementById('current-mode-badge');
+    const isMobile = window.innerWidth <= 1028;
+    badge.textContent = isMobile ? t.currentModeBadgeMobile : t.currentModeBadge;
+
     const welcomeText = document.querySelectorAll('.welcome-modal-box p')[0];
     const welcomeButtonDiv = document.querySelector('.button-highlight');
     const welcomeFooter = document.querySelectorAll('.welcome-modal-box p')[1];
@@ -431,6 +416,14 @@
     welcomeFooter.textContent = t.welcomeFooter;
     welcomeBtn.textContent = t.welcomeBtn;
   }
+
+  // ✅ ACTUALIZAR EL BADGE AL CAMBIAR EL TAMAÑO DE LA VENTANA
+  window.addEventListener('resize', () => {
+    const t = translations[currentLang];
+    const badge = document.getElementById('current-mode-badge');
+    const isMobile = window.innerWidth <= 1028;
+    badge.textContent = isMobile ? t.currentModeBadgeMobile : t.currentModeBadge;
+  });
 
   function abrirSwitchModal() {
     document.getElementById('switch-modal').classList.add('active');
