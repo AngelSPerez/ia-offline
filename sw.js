@@ -1,4 +1,4 @@
-const CACHE_NAME = 'whyai-cache-v4';
+const CACHE_NAME = 'whyai-cache-v5';
 
 const SW_PATH = self.location.pathname;
 const BASE_PATH = SW_PATH.substring(0, SW_PATH.lastIndexOf('/'));
@@ -11,12 +11,12 @@ function asset(path) {
 
 const STATIC_ASSETS = [
   asset('/index.html'),
+  asset('/offline.html'),
   asset('/manifest.json'),
   asset('/custom-whyai.css'),
   asset('/high.css'),
   asset('/install.html'),
   asset('/redirect.html'),
-  asset('/offline.html'),
   asset('/assets/index-BZ_wFqig.js'),
   asset('/assets/index-q-smNyI7.css'),
   asset('/assets/wllama-DTxmcCWH.wasm'),
@@ -62,24 +62,23 @@ self.addEventListener('fetch', event => {
 
   if (req.method !== 'GET') return;
 
-  // 🚫 EXCLUIR IPAPI (CORS)
-  if (url.hostname === 'ipapi.co') {
-    return; // deja que el navegador lo maneje
-  }
+  // 🚫 dejar ipapi libre
+  if (url.hostname === 'ipapi.co') return;
 
   event.respondWith(
     (async () => {
       try {
         const netRes = await fetch(req);
 
-        // ✅ COOP / COEP solo navegación mismo origen
+        // 🧠 SOLO OFFLINE.HTML → COEP + COOP
         if (
           req.mode === 'navigate' &&
-          url.origin === self.location.origin
+          url.origin === self.location.origin &&
+          url.pathname.endsWith('/offline.html')
         ) {
           const headers = new Headers(netRes.headers);
-          headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
           headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+          headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
 
           return new Response(netRes.body, {
             status: netRes.status,
@@ -88,7 +87,7 @@ self.addEventListener('fetch', event => {
           });
         }
 
-        // 📦 Cache solo mismo origen y no documentos
+        // 📦 cache solo mismo origen (no documentos)
         if (
           url.origin === self.location.origin &&
           netRes.ok &&
@@ -113,4 +112,3 @@ self.addEventListener('fetch', event => {
     })()
   );
 });
-
