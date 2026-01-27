@@ -1,4 +1,4 @@
-const CACHE_NAME = 'whyai-cache-v2';
+const CACHE_NAME = 'whyai-cache-v3';
 
 const SW_PATH = self.location.pathname;
 const BASE_PATH = SW_PATH.substring(0, SW_PATH.lastIndexOf('/'));
@@ -17,7 +17,6 @@ const STATIC_ASSETS = [
   asset('/install.html'),
   asset('/redirect.html'),
   asset('/offline.html'),
-  asset('/build.sh'),
   asset('/assets/index-BZ_wFqig.js'),
   asset('/assets/index-q-smNyI7.css'),
   asset('/assets/wllama-DTxmcCWH.wasm'),
@@ -33,20 +32,14 @@ const STATIC_ASSETS = [
 
 const IFRAME_DOMAIN = 'whyia-chat221.vercel.app';
 
-console.log('🔧 BASE_PATH detectado:', BASE_PATH);
-
 // INSTALL
-self.addEventListener('install', e => {
-  e.waitUntil(
+self.addEventListener('install', event => {
+  event.waitUntil(
     caches.open(CACHE_NAME).then(async cache => {
-      console.log('📦 Cacheando assets estáticos...');
-      for (const asset of STATIC_ASSETS) {
+      for (const a of STATIC_ASSETS) {
         try {
-          const res = await fetch(asset);
-          if (res.ok) {
-            await cache.put(asset, res);
-            console.log('✅ Cacheado:', asset);
-          }
+          const res = await fetch(a);
+          if (res.ok) await cache.put(a, res);
         } catch {}
       }
     })
@@ -55,77 +48,60 @@ self.addEventListener('install', e => {
 });
 
 // ACTIVATE
-self.addEventListener('activate', e => {
-  e.waitUntil(
+self.addEventListener('activate', event => {
+  event.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      )
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
 });
 
-// FETCH — NETWORK FIRST GLOBAL
-self.addEventListener('fetch', e => {
-  const req = e.request;
-  const url = new URL(req.url);
+// FETCH — NETWORK FIRST REAL
+self.addEventListener('fetch', event => {
+  const req = event.request;
 
-  // Solo GET
   if (req.method !== 'GET') return;
 
-  e.respondWith(
+  event.respondWith(
     (async () => {
       try {
-        // 🌐 INTENTO DE RED SIEMPRE
-        const response = await fetch(req);
+        const networkResponse = await fetch(req);
 
-        // 🧠 Inyectar COOP/COEP SOLO en documentos del mismo origen
-        if (url.origin === self.location.origin && req.destination === 'document') {
-          const headers = new Headers(response.headers);
+        // ✅ SOLO navegación del mismo origen → headers
+        if (
+          req.mode === 'navigate' &&
+          new URL(req.url).origin === self.location.origin
+        ) {
+          const headers = new Headers(networkResponse.headers);
           headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
           headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
-          const modified = new Response(response.body, {
-            status: response.status,
-            statusText: response.statusText,
-            headers,
+          return new Response(networkResponse.body, {
+            status: networkResponse.status,
+            statusText: networkResponse.statusText,
+            headers
           });
-
-          const clone = modified.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(req, clone).catch(() => {});
-          });
-
-          console.log('🌐 Documento desde RED:', req.url);
-          return modified;
         }
 
-        // 📦 Cachear cualquier recurso válido (incluye iframe)
-        if (response.ok || response.type === 'opaque') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(req, clone).catch(() => {});
-          });
-
-          if (url.hostname === IFRAME_DOMAIN) {
-            console.log('🌐 Iframe desde RED:', req.url);
-          }
+        // 📦 Cachear solo recursos seguros (NO documents)
+        if (
+          networkResponse.ok &&
+          req.destination !== 'document'
+        ) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(req, networkResponse.clone()).catch(() => {});
         }
 
-        return response;
+        return networkResponse;
 
       } catch (err) {
-        // ❌ RED FALLÓ → USAR CACHE REAL
+        // 🔻 SOLO si la red realmente falló
         const cached = await caches.match(req);
-        if (cached) {
-          console.warn('⚠️ Cache fallback:', req.url);
-          return cached;
-        }
+        if (cached) return cached;
 
-        // Último recurso para navegación
         if (req.mode === 'navigate') {
-          return caches.match(asset('/index.html'));
+          return caches.match(asset('/offline.html'));
         }
 
         throw err;
