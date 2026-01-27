@@ -78,7 +78,7 @@ self.addEventListener('fetch', event => {
           url.origin === self.location.origin
         ) {
           const headers = new Headers(netRes.headers);
-          headers.set('Cross-Origin-Embedder-Policy', 'require-corp');
+          headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
           headers.set('Cross-Origin-Opener-Policy', 'same-origin');
 
           return new Response(netRes.body, {
@@ -113,3 +113,4 @@ self.addEventListener('fetch', event => {
     })()
   );
 });
+
