@@ -28,6 +28,7 @@ const STATIC_ASSETS = [
   asset('/whyai.png'),
   asset('/icons/whyai-off.png'),
   asset('/power.png')
+  asset('/image.png')
 ];
 
 // INSTALL
@@ -112,3 +113,4 @@ self.addEventListener('fetch', event => {
     })()
   );
 });
+
