@@ -333,7 +333,7 @@
       }
 
       .off-msg p {
-        width: 68%;
+        width: 30%;
         text-align: center;
       }
       
@@ -506,7 +506,7 @@
     document.getElementById('offline-toast').classList.remove('show');
   });
 
-  // ✅ DETECTOR DE INTERNET PARA IFRAME
+  // ✅ DETECTOR DE INTERNET PARA IFRAME (MEJORADO)
   function verificarConexion() {
     const iframeContainer = document.querySelector('.iframe-container');
     const offMsg = document.querySelector('.off-msg');
@@ -522,8 +522,31 @@
     }
   }
 
-  // Verificar conexión al cargar la página
-  verificarConexion();
+  // Verificación más robusta al cargar
+  function verificarConexionInicial() {
+    // Intentar hacer una petición al servidor del iframe para verificar conexión real
+    fetch('https://whyia-chat221.vercel.app/', { 
+      mode: 'no-cors',
+      cache: 'no-store'
+    })
+    .then(() => {
+      // Hay conexión real
+      const iframeContainer = document.querySelector('.iframe-container');
+      const offMsg = document.querySelector('.off-msg');
+      iframeContainer.style.display = 'block';
+      offMsg.style.display = 'none';
+    })
+    .catch(() => {
+      // No hay conexión real
+      const iframeContainer = document.querySelector('.iframe-container');
+      const offMsg = document.querySelector('.off-msg');
+      iframeContainer.style.display = 'none';
+      offMsg.style.display = 'flex';
+    });
+  }
+
+  // Verificar conexión al cargar la página con método robusto
+  verificarConexionInicial();
 
   // Escuchar cambios en la conexión en tiempo real
   window.addEventListener('online', verificarConexion);
@@ -542,4 +565,3 @@
 </body>
 
 </html>
-
