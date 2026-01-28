@@ -23,11 +23,19 @@
         padding: 0;
         height: 100%;
         overflow: hidden;
+        background-color: #1c1c1c;
+        color: #ffffff;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       }
+
       .iframe-container {
         width: 100%;
         height: 100%;
+        position: absolute;
+        z-index: 9999;
+        display: none;
       }
+      
       iframe {
         border: none;
       }
@@ -309,6 +317,26 @@
           font-size: 1.3rem;
         }
       }
+
+      .off-msg {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
+      .off-msg img {
+        width: 150px;
+        height: 150px;
+      }
+
+      .off-msg p {
+        width: 30%;
+        text-align: center;
+      }
+      
     </style>
 </head>
 <body>
@@ -347,8 +375,16 @@
 <!-- Toast Offline -->
 <div id="offline-toast"></div>
 
+
+
 <div class="iframe-container">
   <iframe src="https://whyia-chat221.vercel.app/" width="100%" height="100%"></iframe>
+</div>
+
+<div class="off-msg">
+  <img src="image.png" alt="No internet connection.">
+  <h1>Sin conexión</h1>
+  <p>No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.</p>
 </div>
 
 <div id="online-indicator" onclick="abrirSwitchModal()">Online Mode</div>
@@ -366,7 +402,9 @@
       welcomeButton: "Pulsa el botón de la esquina superior derecha, despues de esta pantalla.",
       welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
       welcomeBtn: "Entendido",
-      offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado."
+      offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado.",
+      offlineMsgTitle: "Sin conexión",
+      offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente."
     },
     en: {
       switchTitle: "Switch Mode",
@@ -379,7 +417,9 @@
       welcomeButton: "Tap the button in the top right corner, after this screen.",
       welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
       welcomeBtn: "Got it",
-      offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it."
+      offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it.",
+      offlineMsgTitle: "No connection",
+      offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously."
     }
   };
 
@@ -415,6 +455,10 @@
     welcomeButtonDiv.innerHTML = ' ' + t.welcomeButton;
     welcomeFooter.textContent = t.welcomeFooter;
     welcomeBtn.textContent = t.welcomeBtn;
+
+    // ✅ TRADUCIR MENSAJE OFFLINE
+    document.querySelector('.off-msg h1').textContent = t.offlineMsgTitle;
+    document.querySelector('.off-msg p').textContent = t.offlineMsgText;
   }
 
   // ✅ ACTUALIZAR EL BADGE AL CAMBIAR EL TAMAÑO DE LA VENTANA
@@ -461,6 +505,29 @@
   window.addEventListener('online', () => {
     document.getElementById('offline-toast').classList.remove('show');
   });
+
+  // ✅ DETECTOR DE INTERNET PARA IFRAME
+  function verificarConexion() {
+    const iframeContainer = document.querySelector('.iframe-container');
+    const offMsg = document.querySelector('.off-msg');
+    
+    if (navigator.onLine) {
+      // Hay internet - mostrar iframe, ocultar mensaje offline
+      iframeContainer.style.display = 'block';
+      offMsg.style.display = 'none';
+    } else {
+      // No hay internet - ocultar iframe, mostrar mensaje offline
+      iframeContainer.style.display = 'none';
+      offMsg.style.display = 'flex';
+    }
+  }
+
+  // Verificar conexión al cargar la página
+  verificarConexion();
+
+  // Escuchar cambios en la conexión en tiempo real
+  window.addEventListener('online', verificarConexion);
+  window.addEventListener('offline', verificarConexion);
 
   detectarIdioma();
   mostrarWelcomeModal();
