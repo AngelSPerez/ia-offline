@@ -625,24 +625,17 @@
         }
       }
 
-      .image-wrapper {
-        position: relative;
-        margin-bottom: 15px;
+      #generated-image {
+        width: 100%;
+        display: block;
         border-radius: 12px;
-        overflow: hidden;
-        background: #1a1a1a;
+        margin-bottom: 15px;
         border: 2px solid #333;
         transition: border-color 0.3s;
       }
 
-      .image-wrapper:hover {
+      #generated-image:hover {
         border-color: #4ade80;
-      }
-
-      #generated-image {
-        width: 100%;
-        display: block;
-        border-radius: 10px;
       }
 
       /* Botones de acción */
@@ -790,9 +783,7 @@
 
     <!-- Resultado -->
     <div id="image-result">
-      <div class="image-wrapper">
-        <img id="generated-image" alt="Imagen generada">
-      </div>
+      <img id="generated-image" alt="Imagen generada">
       
       <div class="action-buttons">
         <button class="action-btn" onclick="descargarImagen()">
