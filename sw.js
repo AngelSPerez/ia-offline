@@ -27,8 +27,8 @@ const STATIC_ASSETS = [
   asset('/icons/logo512.png'),
   asset('/whyai.png'),
   asset('/icons/whyai-off.png'),
-  asset('/power.png')
-  asset('/image.png')
+  asset('/power.png'),
+  asset('/image.png'),
   asset('/generar.png')
 ];
 
@@ -114,5 +114,6 @@ self.addEventListener('fetch', event => {
     })()
   );
 });
+
 
 
