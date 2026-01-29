@@ -84,6 +84,38 @@
         }
       }
 
+      /* === BOTÓN GENERAR IMAGEN === */
+      #image-gen-btn {
+        position: fixed;
+        top: 16px;
+        right: 70px;
+        width: 34px;
+        height: 34px;
+        cursor: pointer;
+        z-index: 9999;
+        border-radius: 50%;
+        background: #1a1a1a;
+        border: 1px solid #444;
+        padding: 6px;
+        transition: all 0.2s;
+      }
+
+      #image-gen-btn:hover {
+        border-color: #666;
+        background: #202020;
+        transform: scale(1.05);
+      }
+
+      @media (max-width: 1028px) {
+        #image-gen-btn {
+          top: 12px;
+          right: 56px;
+          width: 32px;
+          height: 32px;
+          padding: 5px;
+        }
+      }
+
       /* --- MODAL SWITCH MODE --- */
       .switch-modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -188,6 +220,9 @@
         margin-top: 15px;
         font-family: ui-sans-serif, system-ui, sans-serif;
         transition: all 0.2s;
+        font-size: 0.9rem;
+        display: inline-block;
+        text-decoration: none;
       }
 
       .close-switch-btn:hover {
@@ -336,11 +371,45 @@
         width: 68%;
         text-align: center;
       }
+
+      /* === ESTILOS MODAL GENERADOR DE IMÁGENES === */
+      #image-result {
+        margin-top: 15px;
+        display: none;
+      }
+
+      #generated-image {
+        width: 100%;
+        border-radius: 8px;
+        margin-bottom: 15px;
+      }
+
+      #image-prompt {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #444;
+        background: #1a1a1a;
+        color: #fff;
+        margin-bottom: 12px;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+      }
+
+      #image-prompt:focus {
+        outline: none;
+        border-color: #4ade80;
+      }
       
     </style>
 </head>
 <body>
 
+<!-- === BOTÓN GENERAR IMAGEN === -->
+<img id="image-gen-btn" src="generar.png" onclick="abrirImageModal()" title="Generar imagen" alt="Generar imagen" />
+
+<!-- MODAL BIENVENIDA -->
 <div class="welcome-modal-overlay" id="welcome-modal">
   <div class="welcome-modal-box">
     <h2>¡Bienvenido a WhyAI!</h2>
@@ -353,6 +422,7 @@
   </div>
 </div>
 
+<!-- MODAL SWITCH MODE -->
 <div class="switch-modal-overlay" id="switch-modal">
   <div class="switch-modal-box">
     <h2 id="switch-title">Switch Mode</h2>
@@ -372,21 +442,50 @@
   </div>
 </div>
 
+<!-- === MODAL GENERADOR DE IMÁGENES === -->
+<div class="switch-modal-overlay" id="image-modal">
+  <div class="switch-modal-box">
+    <h2 id="img-title">Generar imagen</h2>
+
+    <input
+      id="image-prompt"
+      type="text"
+      placeholder="Describe la imagen que quieres generar"
+    />
+
+    <button class="welcome-btn" onclick="generarImagen()" id="img-generate-btn">
+      Generar
+    </button>
+
+    <div id="image-result">
+      <img id="generated-image" alt="Imagen generada">
+      <a id="download-image" download="imagen.png" class="close-switch-btn">
+        Descargar imagen
+      </a>
+    </div>
+
+    <button class="close-switch-btn" onclick="cerrarImageModal()" id="img-close-btn">
+      Cerrar
+    </button>
+  </div>
+</div>
+
 <!-- Toast Offline -->
 <div id="offline-toast"></div>
 
-
-
+<!-- Contenedor iframe -->
 <div class="iframe-container">
   <iframe src="https://whyia-chat221.vercel.app/" width="100%" height="100%"></iframe>
 </div>
 
+<!-- Mensaje sin conexión -->
 <div class="off-msg">
   <img src="image.png" alt="No internet connection.">
   <h1>Sin conexión</h1>
   <p>No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.</p>
 </div>
 
+<!-- Indicador Online -->
 <div id="online-indicator" onclick="abrirSwitchModal()">Online Mode</div>
 
 <script>
@@ -404,7 +503,12 @@
       welcomeBtn: "Entendido",
       offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado.",
       offlineMsgTitle: "Sin conexión",
-      offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente."
+      offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.",
+      imgTitle: "Generar imagen",
+      imgPlaceholder: "Describe la imagen que quieres generar",
+      imgGenerate: "Generar",
+      imgDownload: "Descargar imagen",
+      imgClose: "Cerrar"
     },
     en: {
       switchTitle: "Switch Mode",
@@ -419,11 +523,41 @@
       welcomeBtn: "Got it",
       offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it.",
       offlineMsgTitle: "No connection",
-      offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously."
+      offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously.",
+      imgTitle: "Generate image",
+      imgPlaceholder: "Describe the image you want to generate",
+      imgGenerate: "Generate",
+      imgDownload: "Download image",
+      imgClose: "Close"
     }
   };
 
   let currentLang = 'en';
+
+  // ✅ FUNCIONES MODAL GENERADOR DE IMÁGENES
+  function abrirImageModal() {
+    document.getElementById('image-modal').classList.add('active');
+  }
+
+  function cerrarImageModal() {
+    document.getElementById('image-modal').classList.remove('active');
+    // Resetear el modal
+    document.getElementById('image-prompt').value = '';
+    document.getElementById('image-result').style.display = 'none';
+  }
+
+  function generarImagen() {
+    const prompt = document.getElementById('image-prompt').value.trim();
+    if (!prompt) {
+      alert(currentLang === 'es' ? 'Por favor, describe la imagen que deseas generar' : 'Please describe the image you want to generate');
+      return;
+    }
+
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
+    document.getElementById('generated-image').src = url;
+    document.getElementById('download-image').href = url;
+    document.getElementById('image-result').style.display = 'block';
+  }
 
   // ✅ SOLO IDIOMA DEL NAVEGADOR
   function detectarIdioma() {
@@ -436,6 +570,7 @@
     currentLang = lang;
     const t = translations[lang] || translations.en;
 
+    // Traducir Switch Modal
     document.getElementById('switch-title').textContent = t.switchTitle;
     document.getElementById('online-desc').textContent = t.onlineDesc;
     document.getElementById('offline-desc').textContent = t.offlineDesc;
@@ -446,6 +581,7 @@
     const isMobile = window.innerWidth <= 1028;
     badge.textContent = isMobile ? t.currentModeBadgeMobile : t.currentModeBadge;
 
+    // Traducir Welcome Modal
     const welcomeText = document.querySelectorAll('.welcome-modal-box p')[0];
     const welcomeButtonDiv = document.querySelector('.button-highlight');
     const welcomeFooter = document.querySelectorAll('.welcome-modal-box p')[1];
@@ -459,6 +595,13 @@
     // ✅ TRADUCIR MENSAJE OFFLINE
     document.querySelector('.off-msg h1').textContent = t.offlineMsgTitle;
     document.querySelector('.off-msg p').textContent = t.offlineMsgText;
+
+    // ✅ TRADUCIR MODAL GENERADOR DE IMÁGENES
+    document.getElementById('img-title').textContent = t.imgTitle;
+    document.getElementById('image-prompt').placeholder = t.imgPlaceholder;
+    document.getElementById('img-generate-btn').textContent = t.imgGenerate;
+    document.getElementById('download-image').textContent = t.imgDownload;
+    document.getElementById('img-close-btn').textContent = t.imgClose;
   }
 
   // ✅ ACTUALIZAR EL BADGE AL CAMBIAR EL TAMAÑO DE LA VENTANA
@@ -552,6 +695,7 @@
   window.addEventListener('online', verificarConexion);
   window.addEventListener('offline', verificarConexion);
 
+  // Inicializar
   detectarIdioma();
   mostrarWelcomeModal();
 
