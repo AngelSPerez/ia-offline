@@ -86,16 +86,15 @@
 
       /* === BOTÓN GENERAR IMAGEN === */
       #image-gen-btn {
-        position: absolute;
+        position: fixed;
         top: 14px;
-        right: 70px;
+        right: calc(12% + 120px);
         width: 23px;
         height: 23px;
         cursor: pointer;
         z-index: 99999;
         border-radius: 50%;
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-        margin-right: 17%;
         border: 1px solid #444;
         padding: 6px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -116,10 +115,10 @@
       @media (max-width: 1028px) {
         #image-gen-btn {
           top: 12px;
-          right: 56px;
-          width: 32px;
-          height: 32px;
-          padding: 5px;
+          right: 120px;
+          width: 23px;
+          height: 23px;
+          padding: 6px;
         }
       }
 
@@ -697,12 +696,12 @@
 <!-- MODAL BIENVENIDA -->
 <div class="welcome-modal-overlay" id="welcome-modal">
   <div class="welcome-modal-box">
-    <h2>¡Bienvenido a WhyAI!</h2>
-    <p>Esta IA tiene una <span class="highlight">versión sin conexión</span>. Si te interesa usarla sin internet:</p>
-    <div class="button-highlight">
-      Pulsa el botón de la esquina superior derecha
+    <h2 id="welcome-title">¡Bienvenido a WhyAI!</h2>
+    <p id="welcome-text">Esta IA tiene una <span class="highlight">versión sin conexión</span>. Si te interesa usarla sin internet:</p>
+    <div class="button-highlight" id="welcome-button">
+      Pulsa el botón de la esquina superior derecha, después de esta pantalla.
     </div>
-    <p>Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.</p>
+    <p id="welcome-footer">Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.</p>
     <button class="welcome-btn" onclick="cerrarWelcomeModal()" id="welcome-btn">Entendido</button>
   </div>
 </div>
@@ -714,12 +713,12 @@
     
     <div class="mode-option disabled" id="online-mode-option" onclick="">
       <span class="current-badge" id="current-mode-badge">Current Mode</span>
-      <h3>🌐 Online Mode</h3>
+      <h3 id="online-mode-title">🌐 Online Mode</h3>
       <p id="online-desc">Connect to the internet for cloud-based features and updates.</p>
     </div>
 
     <div class="mode-option" onclick="irOffline()">
-      <h3>📱 Offline Mode</h3>
+      <h3 id="offline-mode-title">📱 Offline Mode</h3>
       <p id="offline-desc">Use WhyAI completely offline with local models.</p>
     </div>
 
@@ -735,12 +734,12 @@
 
     <!-- Sugerencias -->
     <div class="suggestions">
-      <div class="suggestions-title" id="suggestions-title">💡 Sugerencias:</div>
+      <div class="suggestions-title" id="suggestions-title">Sugerencias:</div>
       <div class="suggestion-chips">
-        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Un gato astronauta en el espacio" data-en="An astronaut cat in space">🐱 Gato astronauta</span>
-        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Paisaje futurista con neón" data-en="Futuristic neon landscape">🌃 Paisaje futurista</span>
-        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Dragón majestuoso volando" data-en="Majestic dragon flying">🐉 Dragón</span>
-        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Bosque mágico bioluminiscente" data-en="Magical bioluminescent forest">🌲 Bosque mágico</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Un gato astronauta en el espacio" data-en="An astronaut cat in space">Gato astronauta</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Paisaje futurista con neón" data-en="Futuristic neon landscape">Paisaje futurista</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Dragón majestuoso volando" data-en="Majestic dragon flying">Dragón</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Bosque mágico bioluminiscente" data-en="Magical bioluminescent forest">Bosque mágico</span>
       </div>
     </div>
 
@@ -757,7 +756,7 @@
 
     <!-- Selector de estilo -->
     <div class="option-group">
-      <label class="option-label" id="style-label">🎨 Estilo</label>
+      <label class="option-label" id="style-label">Estilo</label>
       <select class="option-select" id="image-style">
         <option value="" id="style-none">Sin estilo específico</option>
         <option value="photorealistic" id="style-photo">Fotorrealista</option>
@@ -812,8 +811,8 @@
 <!-- Mensaje sin conexión -->
 <div class="off-msg">
   <img src="image.png" alt="No internet connection.">
-  <h1>Sin conexión</h1>
-  <p>No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.</p>
+  <h1 id="offline-msg-title">Sin conexión</h1>
+  <p id="offline-msg-text">No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.</p>
 </div>
 
 <!-- Indicador Online -->
@@ -822,17 +821,20 @@
 <script>
   const translations = {
     es: {
+      welcomeTitle: "¡Bienvenido a WhyAI!",
+      welcomeText: "Esta IA tiene una <span class=\"highlight\">versión sin conexión</span>. Si te interesa usarla sin internet:",
+      welcomeButton: "Pulsa el botón de la esquina superior derecha, después de esta pantalla.",
+      welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
+      welcomeBtn: "Entendido",
       switchTitle: "Cambiar Modo",
+      onlineModeTitle: "🌐 Modo Online",
+      offlineModeTitle: "📱 Modo Offline",
       onlineDesc: "Conecta a internet para funciones basadas en la nube y actualizaciones.",
       offlineDesc: "Usa WhyAI completamente offline con modelos locales.",
       closeSwitchBtn: "Cerrar",
       currentModeBadge: "✓ Modo Actual",
       currentModeBadgeMobile: "✓",
-      welcomeText: "Esta IA tiene una <span class=\"highlight\">versión sin conexión</span>. Si te interesa usarla sin internet:",
-      welcomeButton: "Pulsa el botón de la esquina superior derecha, despues de esta pantalla.",
-      welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
-      welcomeBtn: "Entendido",
-      offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado.",
+      offlineToast: "Sin conexión a internet. Cambia a Modo Offline si lo has descargado.",
       offlineMsgTitle: "Sin conexión",
       offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.",
       imgTitle: "Generador de Imágenes",
@@ -842,11 +844,12 @@
       imgDownload: "Descargar",
       imgNew: "Nueva imagen",
       imgClose: "Cerrar",
-      styleLabel: "🎨 Estilo",
-      suggestionsTitle: "💡 Sugerencias:",
+      styleLabel: "Estilo",
+      suggestionsTitle: "Sugerencias:",
       loadingText: "Generando tu imagen...",
       promptError: "Por favor, describe la imagen que deseas generar",
       downloadError: "Error al descargar la imagen",
+      generationError: "Error al generar la imagen. Inténtalo de nuevo.",
       styleNone: "Sin estilo específico",
       stylePhoto: "Fotorrealista",
       styleAnime: "Anime",
@@ -859,16 +862,19 @@
       styleSketch: "Boceto"
     },
     en: {
+      welcomeTitle: "Welcome to WhyAI!",
+      welcomeText: "This AI has an <span class=\"highlight\">offline version</span>. If you're interested in using it without internet:",
+      welcomeButton: "Tap the button in the top right corner, after this screen.",
+      welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
+      welcomeBtn: "Got it",
       switchTitle: "Switch Mode",
+      onlineModeTitle: "🌐 Online Mode",
+      offlineModeTitle: "📱 Offline Mode",
       onlineDesc: "Connect to the internet for cloud-based features and updates.",
       offlineDesc: "Use WhyAI completely offline with local models.",
       closeSwitchBtn: "Close",
       currentModeBadge: "✓ Current Mode",
       currentModeBadgeMobile: "✓",
-      welcomeText: "This AI has an <span class=\"highlight\">offline version</span>. If you're interested in using it without internet:",
-      welcomeButton: "Tap the button in the top right corner, after this screen.",
-      welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
-      welcomeBtn: "Got it",
       offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it.",
       offlineMsgTitle: "No connection",
       offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously.",
@@ -879,11 +885,12 @@
       imgDownload: "Download",
       imgNew: "New image",
       imgClose: "Close",
-      styleLabel: "🎨 Style",
-      suggestionsTitle: "💡 Quick suggestions:",
+      styleLabel: "Style",
+      suggestionsTitle: "Quick suggestions:",
       loadingText: "Generating your image...",
       promptError: "Please describe the image you want to generate",
       downloadError: "Error downloading image",
+      generationError: "Error generating image. Please try again.",
       styleNone: "No specific style",
       stylePhoto: "Photorealistic",
       styleAnime: "Anime",
@@ -956,7 +963,7 @@
       loadingSpinner.classList.remove('active');
       loadingText.classList.remove('active');
       generateBtn.disabled = false;
-      alert(currentLang === 'es' ? 'Error al generar la imagen. Inténtalo de nuevo.' : 'Error generating image. Please try again.');
+      alert(translations[currentLang].generationError);
     };
     
     img.src = url;
@@ -999,8 +1006,17 @@
     currentLang = lang;
     const t = translations[lang] || translations.en;
 
-    // Traducir Switch Modal
+    // ✅ TRADUCIR WELCOME MODAL
+    document.getElementById('welcome-title').textContent = t.welcomeTitle;
+    document.getElementById('welcome-text').innerHTML = t.welcomeText;
+    document.getElementById('welcome-button').textContent = t.welcomeButton;
+    document.getElementById('welcome-footer').textContent = t.welcomeFooter;
+    document.getElementById('welcome-btn').textContent = t.welcomeBtn;
+
+    // ✅ TRADUCIR SWITCH MODAL
     document.getElementById('switch-title').textContent = t.switchTitle;
+    document.getElementById('online-mode-title').textContent = t.onlineModeTitle;
+    document.getElementById('offline-mode-title').textContent = t.offlineModeTitle;
     document.getElementById('online-desc').textContent = t.onlineDesc;
     document.getElementById('offline-desc').textContent = t.offlineDesc;
     document.getElementById('close-switch-btn').textContent = t.closeSwitchBtn;
@@ -1010,26 +1026,15 @@
     const isMobile = window.innerWidth <= 1028;
     badge.textContent = isMobile ? t.currentModeBadgeMobile : t.currentModeBadge;
 
-    // Traducir Welcome Modal
-    const welcomeText = document.querySelectorAll('.welcome-modal-box p')[0];
-    const welcomeButtonDiv = document.querySelector('.button-highlight');
-    const welcomeFooter = document.querySelectorAll('.welcome-modal-box p')[1];
-    const welcomeBtn = document.getElementById('welcome-btn');
-
-    welcomeText.innerHTML = t.welcomeText;
-    welcomeButtonDiv.innerHTML = ' ' + t.welcomeButton;
-    welcomeFooter.textContent = t.welcomeFooter;
-    welcomeBtn.textContent = t.welcomeBtn;
-
     // ✅ TRADUCIR MENSAJE OFFLINE
-    document.querySelector('.off-msg h1').textContent = t.offlineMsgTitle;
-    document.querySelector('.off-msg p').textContent = t.offlineMsgText;
+    document.getElementById('offline-msg-title').textContent = t.offlineMsgTitle;
+    document.getElementById('offline-msg-text').textContent = t.offlineMsgText;
 
     // ✅ TRADUCIR MODAL GENERADOR DE IMÁGENES
     document.getElementById('img-title').textContent = t.imgTitle;
     document.getElementById('img-subtitle').textContent = t.imgSubtitle;
     document.getElementById('image-prompt').placeholder = t.imgPlaceholder;
-    document.getElementById('img-generate-btn').textContent = '🎨 ' + t.imgGenerate;
+    document.getElementById('img-generate-btn').textContent = t.imgGenerate;
     document.getElementById('download-text').textContent = t.imgDownload;
     document.getElementById('new-text').textContent = t.imgNew;
     document.getElementById('img-close-btn').textContent = t.imgClose;
