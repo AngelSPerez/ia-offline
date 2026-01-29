@@ -94,17 +94,23 @@
         cursor: pointer;
         z-index: 99999;
         border-radius: 50%;
-        background: #1a1a1a;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
         margin-right: 17%;
         border: 1px solid #444;
         padding: 6px;
-        transition: all 0.2s;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
       }
 
       #image-gen-btn:hover {
-        border-color: #666;
-        background: #202020;
-        transform: scale(1.05);
+        border-color: #4ade80;
+        background: linear-gradient(135deg, #202020 0%, #2f2f2f 100%);
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 4px 12px rgba(74, 222, 128, 0.2);
+      }
+
+      #image-gen-btn:active {
+        transform: scale(0.95);
       }
 
       @media (max-width: 1028px) {
@@ -373,34 +379,319 @@
         text-align: center;
       }
 
-      /* === ESTILOS MODAL GENERADOR DE IMÁGENES === */
-      #image-result {
-        margin-top: 15px;
-        display: none;
+      /* ========================================
+         MODAL GENERADOR DE IMÁGENES MEJORADO
+         ======================================== */
+      
+      .image-modal-box {
+        background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+        border: 1px solid #555;
+        padding: 25px;
+        border-radius: 16px;
+        max-width: 95%;
+        width: 550px;
+        max-height: 90vh;
+        overflow-y: auto;
+        text-align: center;
+        color: #ececec;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+        margin: 20px;
       }
 
-      #generated-image {
-        width: 100%;
-        border-radius: 8px;
-        margin-bottom: 15px;
+      .image-modal-box::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .image-modal-box::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 10px;
+      }
+
+      .image-modal-box::-webkit-scrollbar-thumb {
+        background: #4ade80;
+        border-radius: 10px;
+      }
+
+      .image-modal-box h2 {
+        margin-top: 0;
+        color: #fff;
+        margin-bottom: 8px;
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, #4ade80 0%, #3bc96f 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .image-modal-subtitle {
+        color: #999;
+        font-size: 0.9rem;
+        margin-bottom: 25px;
+        font-weight: normal;
+      }
+
+      /* Sugerencias de prompts */
+      .suggestions {
+        margin-bottom: 20px;
+      }
+
+      .suggestions-title {
+        font-size: 0.85rem;
+        color: #999;
+        margin-bottom: 10px;
+        text-align: left;
+      }
+
+      .suggestion-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .suggestion-chip {
+        background: #1a1a1a;
+        border: 1px solid #444;
+        color: #aaa;
+        padding: 6px 12px;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .suggestion-chip:hover {
+        background: #4ade80;
+        color: #1a1a1a;
+        border-color: #4ade80;
+      }
+
+      /* Área de prompt mejorada */
+      .prompt-container {
+        position: relative;
+        margin-bottom: 25px;
       }
 
       #image-prompt {
         width: 100%;
-        padding: 10px;
-        border-radius: 6px;
-        border: 1px solid #444;
+        padding: 14px 16px;
+        border-radius: 10px;
+        border: 2px solid #444;
         background: #1a1a1a;
         color: #fff;
-        margin-bottom: 12px;
         font-family: ui-sans-serif, system-ui, sans-serif;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         box-sizing: border-box;
+        transition: all 0.3s ease;
+        resize: vertical;
+        min-height: 80px;
       }
 
       #image-prompt:focus {
         outline: none;
         border-color: #4ade80;
+        background: #1f1f1f;
+        box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.1);
+      }
+
+      #image-prompt::placeholder {
+        color: #666;
+      }
+
+      .char-counter {
+        position: absolute;
+        bottom: -20px;
+        right: 8px;
+        font-size: 0.75rem;
+        color: #666;
+      }
+
+      /* Selector de estilo */
+      .option-group {
+        text-align: left;
+        margin-bottom: 20px;
+      }
+
+      .option-label {
+        display: block;
+        font-size: 0.85rem;
+        color: #aaa;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+
+      .option-select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #444;
+        background: #1a1a1a;
+        color: #fff;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .option-select:hover {
+        border-color: #555;
+        background: #1f1f1f;
+      }
+
+      .option-select:focus {
+        outline: none;
+        border-color: #4ade80;
+      }
+
+      /* Botón generar mejorado */
+      .generate-btn {
+        background: linear-gradient(135deg, #4ade80 0%, #3bc96f 100%);
+        color: #1a1a1a;
+        border: none;
+        padding: 14px 40px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1rem;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+        width: 100%;
+        margin-bottom: 20px;
+      }
+
+      .generate-btn:hover:not(:disabled) {
+        background: linear-gradient(135deg, #5ae890 0%, #4bd980 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(74, 222, 128, 0.4);
+      }
+
+      .generate-btn:active:not(:disabled) {
+        transform: translateY(0);
+      }
+
+      .generate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #444;
+      }
+
+      /* Estado de carga */
+      .loading-spinner {
+        display: none;
+        margin: 20px auto;
+        width: 50px;
+        height: 50px;
+        border: 4px solid #333;
+        border-top-color: #4ade80;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      .loading-spinner.active {
+        display: block;
+      }
+
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      .loading-text {
+        display: none;
+        color: #aaa;
+        font-size: 0.9rem;
+        margin-top: 10px;
+      }
+
+      .loading-text.active {
+        display: block;
+      }
+
+      /* Resultado de imagen mejorado */
+      #image-result {
+        margin-top: 25px;
+        display: none;
+        animation: fadeInUp 0.5s ease;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .image-wrapper {
+        position: relative;
+        margin-bottom: 15px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #1a1a1a;
+        border: 2px solid #333;
+        transition: border-color 0.3s;
+      }
+
+      .image-wrapper:hover {
+        border-color: #4ade80;
+      }
+
+      #generated-image {
+        width: 100%;
+        display: block;
+        border-radius: 10px;
+      }
+
+      /* Botones de acción */
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .action-btn {
+        background: #1a1a1a;
+        color: #4ade80;
+        border: 1px solid #4ade80;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        transition: all 0.2s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .action-btn:hover {
+        background: #4ade80;
+        color: #1a1a1a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .image-modal-box {
+          padding: 20px;
+          width: 95%;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .action-btn {
+          width: 100%;
+          justify-content: center;
+        }
       }
       
     </style>
@@ -443,26 +734,74 @@
   </div>
 </div>
 
-<!-- === MODAL GENERADOR DE IMÁGENES === -->
+<!-- === MODAL GENERADOR DE IMÁGENES MEJORADO === -->
 <div class="switch-modal-overlay" id="image-modal">
-  <div class="switch-modal-box">
-    <h2 id="img-title">Generar imagen</h2>
+  <div class="image-modal-box">
+    <h2 id="img-title">✨ Generador de Imágenes</h2>
+    <p class="image-modal-subtitle" id="img-subtitle">Crea imágenes con inteligencia artificial</p>
 
-    <input
-      id="image-prompt"
-      type="text"
-      placeholder="Describe la imagen que quieres generar"
-    />
+    <!-- Sugerencias -->
+    <div class="suggestions">
+      <div class="suggestions-title" id="suggestions-title">💡 Sugerencias:</div>
+      <div class="suggestion-chips">
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Un gato astronauta en el espacio" data-en="An astronaut cat in space">🐱 Gato astronauta</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Paisaje futurista con neón" data-en="Futuristic neon landscape">🌃 Paisaje futurista</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Dragón majestuoso volando" data-en="Majestic dragon flying">🐉 Dragón</span>
+        <span class="suggestion-chip" onclick="usarSugerencia(this)" data-es="Bosque mágico bioluminiscente" data-en="Magical bioluminescent forest">🌲 Bosque mágico</span>
+      </div>
+    </div>
 
-    <button class="welcome-btn" onclick="generarImagen()" id="img-generate-btn">
-      Generar
+    <!-- Prompt -->
+    <div class="prompt-container">
+      <textarea
+        id="image-prompt"
+        placeholder="Describe la imagen que quieres generar..."
+        maxlength="500"
+        oninput="actualizarContador()"
+      ></textarea>
+      <div class="char-counter" id="char-counter">0/500</div>
+    </div>
+
+    <!-- Selector de estilo -->
+    <div class="option-group">
+      <label class="option-label" id="style-label">🎨 Estilo</label>
+      <select class="option-select" id="image-style">
+        <option value="">Sin estilo específico</option>
+        <option value="photorealistic">Fotorrealista</option>
+        <option value="anime">Anime</option>
+        <option value="oil painting">Pintura al óleo</option>
+        <option value="watercolor">Acuarela</option>
+        <option value="digital art">Arte digital</option>
+        <option value="3d render">Render 3D</option>
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="cartoon">Caricatura</option>
+        <option value="sketch">Boceto</option>
+      </select>
+    </div>
+
+    <!-- Botón generar -->
+    <button class="generate-btn" onclick="generarImagen()" id="img-generate-btn">
+      🎨 Generar Imagen
     </button>
 
+    <!-- Loading -->
+    <div class="loading-spinner" id="loading-spinner"></div>
+    <div class="loading-text" id="loading-text">Generando tu imagen...</div>
+
+    <!-- Resultado -->
     <div id="image-result">
-      <img id="generated-image" alt="Imagen generada">
-      <a id="download-image" download="imagen.png" class="close-switch-btn">
-        Descargar imagen
-      </a>
+      <div class="image-wrapper">
+        <img id="generated-image" alt="Imagen generada">
+      </div>
+      
+      <div class="action-buttons">
+        <button class="action-btn" onclick="descargarImagen()">
+          ⬇️ <span id="download-text">Descargar</span>
+        </button>
+        <button class="action-btn" onclick="nuevaImagen()">
+          ✨ <span id="new-text">Nueva imagen</span>
+        </button>
+      </div>
     </div>
 
     <button class="close-switch-btn" onclick="cerrarImageModal()" id="img-close-btn">
@@ -505,11 +844,18 @@
       offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado.",
       offlineMsgTitle: "Sin conexión",
       offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.",
-      imgTitle: "Generar imagen",
-      imgPlaceholder: "Describe la imagen que quieres generar",
-      imgGenerate: "Generar",
-      imgDownload: "Descargar imagen",
-      imgClose: "Cerrar"
+      imgTitle: "✨ Generador de Imágenes",
+      imgSubtitle: "Crea imágenes con inteligencia artificial",
+      imgPlaceholder: "Describe la imagen que quieres generar...",
+      imgGenerate: "Generar Imagen",
+      imgDownload: "Descargar",
+      imgNew: "Nueva imagen",
+      imgClose: "Cerrar",
+      styleLabel: "🎨 Estilo",
+      suggestionsTitle: "💡 Sugerencias:",
+      loadingText: "Generando tu imagen...",
+      promptError: "Por favor, describe la imagen que deseas generar",
+      downloadError: "Error al descargar la imagen"
     },
     en: {
       switchTitle: "Switch Mode",
@@ -525,39 +871,110 @@
       offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it.",
       offlineMsgTitle: "No connection",
       offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously.",
-      imgTitle: "Generate image",
-      imgPlaceholder: "Describe the image you want to generate",
-      imgGenerate: "Generate",
-      imgDownload: "Download image",
-      imgClose: "Close"
+      imgTitle: "✨ AI Image Generator",
+      imgSubtitle: "Create amazing images with artificial intelligence",
+      imgPlaceholder: "Describe the image you want to generate...",
+      imgGenerate: "Generate Image",
+      imgDownload: "Download",
+      imgNew: "New image",
+      imgClose: "Close",
+      styleLabel: "🎨 Style",
+      suggestionsTitle: "💡 Quick suggestions:",
+      loadingText: "Generating your image...",
+      promptError: "Please describe the image you want to generate",
+      downloadError: "Error downloading image"
     }
   };
 
   let currentLang = 'en';
+  let currentImageUrl = '';
 
   // ✅ FUNCIONES MODAL GENERADOR DE IMÁGENES
+  function usarSugerencia(element) {
+    const prompt = currentLang === 'es' ? element.dataset.es : element.dataset.en;
+    document.getElementById('image-prompt').value = prompt;
+    actualizarContador();
+  }
+
+  function actualizarContador() {
+    const prompt = document.getElementById('image-prompt').value;
+    document.getElementById('char-counter').textContent = `${prompt.length}/500`;
+  }
+
   function abrirImageModal() {
     document.getElementById('image-modal').classList.add('active');
   }
 
   function cerrarImageModal() {
     document.getElementById('image-modal').classList.remove('active');
-    // Resetear el modal
-    document.getElementById('image-prompt').value = '';
-    document.getElementById('image-result').style.display = 'none';
   }
 
   function generarImagen() {
     const prompt = document.getElementById('image-prompt').value.trim();
     if (!prompt) {
-      alert(currentLang === 'es' ? 'Por favor, describe la imagen que deseas generar' : 'Please describe the image you want to generate');
+      alert(translations[currentLang].promptError);
       return;
     }
 
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
-    document.getElementById('generated-image').src = url;
-    document.getElementById('download-image').href = url;
-    document.getElementById('image-result').style.display = 'block';
+    const style = document.getElementById('image-style').value;
+    const finalPrompt = style ? `${prompt}, ${style} style` : prompt;
+
+    const generateBtn = document.getElementById('img-generate-btn');
+    const loadingSpinner = document.getElementById('loading-spinner');
+    const loadingText = document.getElementById('loading-text');
+    
+    generateBtn.disabled = true;
+    loadingSpinner.classList.add('active');
+    loadingText.classList.add('active');
+    document.getElementById('image-result').style.display = 'none';
+
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+    
+    const img = new Image();
+    img.onload = () => {
+      currentImageUrl = url;
+      document.getElementById('generated-image').src = url;
+      
+      loadingSpinner.classList.remove('active');
+      loadingText.classList.remove('active');
+      generateBtn.disabled = false;
+      document.getElementById('image-result').style.display = 'block';
+    };
+    
+    img.onerror = () => {
+      loadingSpinner.classList.remove('active');
+      loadingText.classList.remove('active');
+      generateBtn.disabled = false;
+      alert(currentLang === 'es' ? 'Error al generar la imagen. Inténtalo de nuevo.' : 'Error generating image. Please try again.');
+    };
+    
+    img.src = url;
+  }
+
+  async function descargarImagen() {
+    if (!currentImageUrl) return;
+    
+    try {
+      const response = await fetch(currentImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `whyai-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error:', error);
+      alert(translations[currentLang].downloadError);
+    }
+  }
+
+  function nuevaImagen() {
+    document.getElementById('image-prompt').value = '';
+    document.getElementById('image-result').style.display = 'none';
+    actualizarContador();
   }
 
   // ✅ SOLO IDIOMA DEL NAVEGADOR
@@ -599,10 +1016,15 @@
 
     // ✅ TRADUCIR MODAL GENERADOR DE IMÁGENES
     document.getElementById('img-title').textContent = t.imgTitle;
+    document.getElementById('img-subtitle').textContent = t.imgSubtitle;
     document.getElementById('image-prompt').placeholder = t.imgPlaceholder;
-    document.getElementById('img-generate-btn').textContent = t.imgGenerate;
-    document.getElementById('download-image').textContent = t.imgDownload;
+    document.getElementById('img-generate-btn').textContent = '🎨 ' + t.imgGenerate;
+    document.getElementById('download-text').textContent = t.imgDownload;
+    document.getElementById('new-text').textContent = t.imgNew;
     document.getElementById('img-close-btn').textContent = t.imgClose;
+    document.getElementById('style-label').textContent = t.styleLabel;
+    document.getElementById('suggestions-title').textContent = t.suggestionsTitle;
+    document.getElementById('loading-text').textContent = t.loadingText;
   }
 
   // ✅ ACTUALIZAR EL BADGE AL CAMBIAR EL TAMAÑO DE LA VENTANA
