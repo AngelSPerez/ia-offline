@@ -87,18 +87,21 @@
       /* === BOTÓN GENERAR IMAGEN === */
       #image-gen-btn {
         position: fixed;
-        top: 14px;
-        right: calc(12% + 120px);
-        width: 23px;
-        height: 23px;
+        top: 16px;
+        left: 16px;
+        width: 35px;
+        height: 35px;
         cursor: pointer;
         z-index: 99999;
         border-radius: 50%;
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
         border: 1px solid #444;
-        padding: 6px;
+        padding: 0;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       #image-gen-btn:hover {
@@ -115,10 +118,9 @@
       @media (max-width: 1028px) {
         #image-gen-btn {
           top: 12px;
-          right: 120px;
-          width: 23px;
-          height: 23px;
-          padding: 6px;
+          left: 12px;
+          width: 32px;
+          height: 32px;
         }
       }
 
@@ -713,12 +715,12 @@
     
     <div class="mode-option disabled" id="online-mode-option" onclick="">
       <span class="current-badge" id="current-mode-badge">Current Mode</span>
-      <h3 id="online-mode-title">🌐 Online Mode</h3>
+      <h3>🌐 Online Mode</h3>
       <p id="online-desc">Connect to the internet for cloud-based features and updates.</p>
     </div>
 
     <div class="mode-option" onclick="irOffline()">
-      <h3 id="offline-mode-title">📱 Offline Mode</h3>
+      <h3>📱 Offline Mode</h3>
       <p id="offline-desc">Use WhyAI completely offline with local models.</p>
     </div>
 
@@ -827,8 +829,6 @@
       welcomeFooter: "Podrás instalar la versión offline y usarla en cualquier momento sin conexión a internet.",
       welcomeBtn: "Entendido",
       switchTitle: "Cambiar Modo",
-      onlineModeTitle: "🌐 Modo Online",
-      offlineModeTitle: "📱 Modo Offline",
       onlineDesc: "Conecta a internet para funciones basadas en la nube y actualizaciones.",
       offlineDesc: "Usa WhyAI completamente offline con modelos locales.",
       closeSwitchBtn: "Cerrar",
@@ -868,8 +868,6 @@
       welcomeFooter: "You'll be able to install the offline version and use it anytime without internet connection.",
       welcomeBtn: "Got it",
       switchTitle: "Switch Mode",
-      onlineModeTitle: "🌐 Online Mode",
-      offlineModeTitle: "📱 Offline Mode",
       onlineDesc: "Connect to the internet for cloud-based features and updates.",
       offlineDesc: "Use WhyAI completely offline with local models.",
       closeSwitchBtn: "Close",
@@ -1015,8 +1013,6 @@
 
     // ✅ TRADUCIR SWITCH MODAL
     document.getElementById('switch-title').textContent = t.switchTitle;
-    document.getElementById('online-mode-title').textContent = t.onlineModeTitle;
-    document.getElementById('offline-mode-title').textContent = t.offlineModeTitle;
     document.getElementById('online-desc').textContent = t.onlineDesc;
     document.getElementById('offline-desc').textContent = t.offlineDesc;
     document.getElementById('close-switch-btn').textContent = t.closeSwitchBtn;
