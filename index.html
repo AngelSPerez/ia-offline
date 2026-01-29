@@ -730,7 +730,7 @@
 <!-- === MODAL GENERADOR DE IMÁGENES MEJORADO === -->
 <div class="switch-modal-overlay" id="image-modal">
   <div class="image-modal-box">
-    <h2 id="img-title">✨ Generador de Imágenes</h2>
+    <h2 id="img-title">Generador de Imágenes</h2>
     <p class="image-modal-subtitle" id="img-subtitle">Crea imágenes con inteligencia artificial</p>
 
     <!-- Sugerencias -->
@@ -759,22 +759,22 @@
     <div class="option-group">
       <label class="option-label" id="style-label">🎨 Estilo</label>
       <select class="option-select" id="image-style">
-        <option value="">Sin estilo específico</option>
-        <option value="photorealistic">Fotorrealista</option>
-        <option value="anime">Anime</option>
-        <option value="oil painting">Pintura al óleo</option>
-        <option value="watercolor">Acuarela</option>
-        <option value="digital art">Arte digital</option>
-        <option value="3d render">Render 3D</option>
-        <option value="cyberpunk">Cyberpunk</option>
-        <option value="cartoon">Caricatura</option>
-        <option value="sketch">Boceto</option>
+        <option value="" id="style-none">Sin estilo específico</option>
+        <option value="photorealistic" id="style-photo">Fotorrealista</option>
+        <option value="anime" id="style-anime">Anime</option>
+        <option value="oil painting" id="style-oil">Pintura al óleo</option>
+        <option value="watercolor" id="style-water">Acuarela</option>
+        <option value="digital art" id="style-digital">Arte digital</option>
+        <option value="3d render" id="style-3d">Render 3D</option>
+        <option value="cyberpunk" id="style-cyber">Cyberpunk</option>
+        <option value="cartoon" id="style-cartoon">Caricatura</option>
+        <option value="sketch" id="style-sketch">Boceto</option>
       </select>
     </div>
 
     <!-- Botón generar -->
     <button class="generate-btn" onclick="generarImagen()" id="img-generate-btn">
-      🎨 Generar Imagen
+      Generar Imagen
     </button>
 
     <!-- Loading -->
@@ -787,10 +787,10 @@
       
       <div class="action-buttons">
         <button class="action-btn" onclick="descargarImagen()">
-          ⬇️ <span id="download-text">Descargar</span>
+          <span id="download-text">Descargar</span>
         </button>
         <button class="action-btn" onclick="nuevaImagen()">
-          ✨ <span id="new-text">Nueva imagen</span>
+          <span id="new-text">Nueva imagen</span>
         </button>
       </div>
     </div>
@@ -835,7 +835,7 @@
       offlineToast: "Sin conexión a internet. Cambia a Offline Mode si lo has descargado.",
       offlineMsgTitle: "Sin conexión",
       offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.",
-      imgTitle: "✨ Generador de Imágenes",
+      imgTitle: "Generador de Imágenes",
       imgSubtitle: "Crea imágenes con inteligencia artificial",
       imgPlaceholder: "Describe la imagen que quieres generar...",
       imgGenerate: "Generar Imagen",
@@ -846,7 +846,17 @@
       suggestionsTitle: "💡 Sugerencias:",
       loadingText: "Generando tu imagen...",
       promptError: "Por favor, describe la imagen que deseas generar",
-      downloadError: "Error al descargar la imagen"
+      downloadError: "Error al descargar la imagen",
+      styleNone: "Sin estilo específico",
+      stylePhoto: "Fotorrealista",
+      styleAnime: "Anime",
+      styleOil: "Pintura al óleo",
+      styleWater: "Acuarela",
+      styleDigital: "Arte digital",
+      style3d: "Render 3D",
+      styleCyber: "Cyberpunk",
+      styleCartoon: "Caricatura",
+      styleSketch: "Boceto"
     },
     en: {
       switchTitle: "Switch Mode",
@@ -862,7 +872,7 @@
       offlineToast: "No internet connection. Switch to Offline Mode if you've downloaded it.",
       offlineMsgTitle: "No connection",
       offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously.",
-      imgTitle: "✨ AI Image Generator",
+      imgTitle: "AI Image Generator",
       imgSubtitle: "Create amazing images with artificial intelligence",
       imgPlaceholder: "Describe the image you want to generate...",
       imgGenerate: "Generate Image",
@@ -873,7 +883,17 @@
       suggestionsTitle: "💡 Quick suggestions:",
       loadingText: "Generating your image...",
       promptError: "Please describe the image you want to generate",
-      downloadError: "Error downloading image"
+      downloadError: "Error downloading image",
+      styleNone: "No specific style",
+      stylePhoto: "Photorealistic",
+      styleAnime: "Anime",
+      styleOil: "Oil painting",
+      styleWater: "Watercolor",
+      styleDigital: "Digital art",
+      style3d: "3D render",
+      styleCyber: "Cyberpunk",
+      styleCartoon: "Cartoon",
+      styleSketch: "Sketch"
     }
   };
 
@@ -1016,6 +1036,18 @@
     document.getElementById('style-label').textContent = t.styleLabel;
     document.getElementById('suggestions-title').textContent = t.suggestionsTitle;
     document.getElementById('loading-text').textContent = t.loadingText;
+
+    // ✅ TRADUCIR OPCIONES DEL SELECTOR DE ESTILO
+    document.getElementById('style-none').textContent = t.styleNone;
+    document.getElementById('style-photo').textContent = t.stylePhoto;
+    document.getElementById('style-anime').textContent = t.styleAnime;
+    document.getElementById('style-oil').textContent = t.styleOil;
+    document.getElementById('style-water').textContent = t.styleWater;
+    document.getElementById('style-digital').textContent = t.styleDigital;
+    document.getElementById('style-3d').textContent = t.style3d;
+    document.getElementById('style-cyber').textContent = t.styleCyber;
+    document.getElementById('style-cartoon').textContent = t.styleCartoon;
+    document.getElementById('style-sketch').textContent = t.styleSketch;
   }
 
   // ✅ ACTUALIZAR EL BADGE AL CAMBIAR EL TAMAÑO DE LA VENTANA
