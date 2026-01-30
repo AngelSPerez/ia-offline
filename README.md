@@ -18,8 +18,7 @@ El proyecto aprovecha principalmente las capacidades de **wllama**, priorizando 
 
 Para instalar WhyAI como aplicación, añade al final de la URL:
 
-´´´install.html´´´
-
+"install.html"
 
 No se requieren instaladores ni ejecutables, lo que lo hace más seguro.
 
