@@ -43,59 +43,35 @@
         border: none;
       }
 
-      /* --- INDICADOR ONLINE --- */
-      #online-indicator {
+      /* === HEADER CON FLEXBOX === */
+      .app-header {
         position: fixed;
-        top: 16px;
-        right: 16px;
-        z-index: 9999;
-        background-color: transparent;
-        border: 1px solid #888;
-        border-radius: 20px;
-        padding: 6px 14px;
-        font-family: ui-sans-serif, system-ui, sans-serif;
-        font-size: 0.85rem;
-        color: #ccc;
+        top: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        z-index: 99999;
+        pointer-events: none;
+      }
+
+      .app-header > * {
         pointer-events: auto;
+      }
+
+      .header-buttons {
         display: flex;
         align-items: center;
-        gap: 6px;
-        cursor: pointer;
-        transition: border-color 0.2s, background-color 0.2s;
-        margin-right: 12%;
-      }
-
-      #online-indicator:hover {
-        border-color: #aaa;
-        background-color: rgba(255, 255, 255, 0.05);
-      }
-
-      #online-indicator::before {
-        content: "●";
-        color: #4ade80;
-        font-size: 0.75rem;
-      }
-
-      @media (max-width: 1028px) {
-        #online-indicator {
-          top: 12px;
-          right: 12px;
-          font-size: 0.8rem;
-          padding: 5px 12px;
-          cursor: pointer;
-          margin-right: 0px;
-        }
+        gap: 12px;
       }
 
       /* === BOTÓN GENERAR IMAGEN === */
       #image-gen-btn {
-        position: fixed;
-        top: 14px;
-        right: calc(12% + 148px);
         width: 33px;
         height: 33px;
         cursor: pointer;
-        z-index: 99999;
         border-radius: 50%;
         background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
         border: 1px solid #444;
@@ -118,12 +94,50 @@
         transform: scale(0.95);
       }
 
+      /* --- INDICADOR ONLINE --- */
+      #online-indicator {
+        background-color: transparent;
+        border: 1px solid #888;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        font-size: 0.85rem;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: border-color 0.2s, background-color 0.2s;
+      }
+
+      #online-indicator:hover {
+        border-color: #aaa;
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      #online-indicator::before {
+        content: "●";
+        color: #4ade80;
+        font-size: 0.75rem;
+      }
+
       @media (max-width: 1028px) {
+        .app-header {
+          padding: 12px 16px;
+        }
+
+        .header-buttons {
+          gap: 10px;
+        }
+
         #image-gen-btn {
-          top: 9px;
-          right: 130px;
-          width: 24px;
-          height: 24px;
+          width: 30px;
+          height: 30px;
+        }
+
+        #online-indicator {
+          font-size: 0.8rem;
+          padding: 5px 12px;
         }
       }
 
@@ -695,8 +709,14 @@
 </head>
 <body>
 
-<!-- === BOTÓN GENERAR IMAGEN === -->
-<img id="image-gen-btn" src="generar.png" onclick="abrirImageModal()" title="Generar imagen" alt="Generar imagen" />
+<!-- === HEADER CON TÍTULO Y BOTONES === -->
+<header class="app-header">
+  <div></div>
+  <div class="header-buttons">
+    <img id="image-gen-btn" src="generar.png" onclick="abrirImageModal()" title="Generar imagen" alt="Generar imagen" />
+    <div id="online-indicator" onclick="abrirSwitchModal()">Online Mode</div>
+  </div>
+</header>
 
 <!-- MODAL BIENVENIDA -->
 <div class="welcome-modal-overlay" id="welcome-modal">
@@ -820,9 +840,6 @@
   <h1 id="offline-msg-title">Sin conexión</h1>
   <p id="offline-msg-text">No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.</p>
 </div>
-
-<!-- Indicador Online -->
-<div id="online-indicator" onclick="abrirSwitchModal()">Online Mode</div>
 
 <script>
   const translations = {
