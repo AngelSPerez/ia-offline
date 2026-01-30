@@ -14,6 +14,12 @@ El proyecto sigue una filosofía **privacy-first**: sin cuentas, sin backend pro
 
 ---
 
+## 📜 Licencia
+
+Este proyecto no es Open-Source es únicamente creado con fines demostrativos.
+
+---
+
 ## 🎯 Objetivo del proyecto
 
 WhyAI nace como un **experimento técnico** con un objetivo claro:
