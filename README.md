@@ -178,9 +178,9 @@ El usuario puede borrar todos los datos fácilmente usando las herramientas del 
 
 ## 💻 Requisitos recomendados
 
-- **RAM:** 8 GB recomendados (16 GB ideal)
+- **RAM:** 4GB recomendados (6GB o 8GB ideal)
 - **CPU:** Arquitectura x86 o ARM de **64 bits**
-- **Almacenamiento:** hasta 1.5 GB libres
+- **Almacenamiento:** hasta 1.5 GB libres (para offline)
 
 ---
 
@@ -258,8 +258,9 @@ Se agradece especialmente:
 
 ## 🔗 Enlaces
 
-- 🌍 **Demo:** https://angelsperez.github.io/ia-offline/
-- 🧑‍💻 **Repositorio:** GitHub del proyecto
+- 🌍 **Demo funcional:** https://angelsperez.github.io/ia-offline/
+
+- 🧑‍💻 **Repositorio:** https://github.com/AngelSPerez/ia-offline
 
 ---
 
