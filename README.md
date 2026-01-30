@@ -1,96 +1,129 @@
 # ia-offline 🌐
 
-This repository hosts an **offline Artificial Intelligence project**, primarily leveraging the capabilities of **wllama**. The goal is to provide an AI experience that functions entirely without an internet connection.
+Este repositorio aloja un proyecto de **Inteligencia Artificial sin conexión a Internet**, aprovechando principalmente las capacidades de **wllama**. El objetivo es proporcionar una experiencia de IA que funcione completamente sin necesidad de una conexión a Internet.
 
-## 🏆 Badges
+## 🏆 Insignias
 
-[![GitHub Stars](https://img.shields.io/github/stars/AngelSPerez/ia-offline?style=flat-square&logo=github)](https://github.com/AngelSPerez/ia-offline/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/AngelSPerez/ia-offline?style=flat-square&logo=github)](https://github.com/AngelSPerez/ia-offline/fork)
-[![GitHub Issues](https://img.shields.io/github/issues/AngelSPerez/ia-offline?style=flat-square&logo=github)](https://github.com/AngelSPerez/ia-offline/issues)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Estrellas de GitHub](https://img.shields.io/github/stars/AngelSPerez/ia-offline?style=flat-square&logo=github)](https://github.com/AngelSPerez/ia-offline/stargazers)
+[![Bifurcaciones de GitHub](https://img.shields.io/github/forks/AngelSPerez/ia-offline?style=flat-square&logo=github)](https://github.com/AngelSPerez/ia-offline/forks)
+[![Licencia](https://img.shields.io/github/license/AngelSPerez/ia-offline?style=flat-square)](LICENSE)
 
-## ✨ Features
+## ✨ Características Principales
 
-*   **Fully Offline AI:** Experience AI interactions without requiring an active internet connection.
-*   **wllama Integration:** Built upon the robust wllama library, enabling local execution of AI models.
-*   **Progressive Web App (PWA) Capabilities:** Designed for seamless offline use and potential installation on devices.
-*   **Customizable Styling:** Includes options for custom CSS to tailor the visual appearance.
-*   **Service Worker for Offline Functionality:** Utilizes `sw.js` to manage offline caching and access.
+*   **Inteligencia Artificial Offline:** Ejecuta modelos de IA localmente, sin depender de una conexión a Internet.
+*   **Basado en wllama:** Utiliza la potencia de wllama para el procesamiento de modelos de lenguaje.
+*   **Experiencia de Usuario Fluida:** Diseñado para una interacción intuitiva y sin interrupciones.
+*   **Instalación Sencilla:** Procedimientos claros para poner en marcha el proyecto rápidamente.
+*   **Personalizable:** Posibilidad de adaptar la interfaz y el comportamiento a necesidades específicas.
 
-## 🚀 Installation
+## 🚀 Instalación
 
-To set up `ia-offline` on your local machine, follow these steps:
+Para instalar y ejecutar `ia-offline` localmente, siga estos pasos:
 
-1.  **Clone the Repository:**
+1.  **Clonar el Repositorio:**
     ```bash
     git clone https://github.com/AngelSPerez/ia-offline.git
     cd ia-offline
     ```
 
-2.  **Build the Project (if applicable):**
-    The repository includes a `build.sh` script, which may be necessary for compiling or preparing assets.
+2.  **Configuración Inicial (Opcional):**
+    Si planea realizar modificaciones o compilaciones, puede ser necesario ejecutar el script de construcción:
     ```bash
     chmod +x build.sh
     ./build.sh
     ```
-    *Note: The exact output and necessity of this script depend on its implementation within the repository.*
 
-3.  **Serve Locally:**
-    To run the application, you will need a local web server. If you have Python 3 installed, you can use the following command in the root directory of the project:
+3.  **Ejecutar el Proyecto:**
+    Abra el archivo `index.html` en su navegador web. Dado que el proyecto está diseñado para funcionar sin conexión, no se requiere un servidor web para la funcionalidad básica.
+
+    Para una experiencia más robusta o si encuentra problemas de carga de recursos, puede servir los archivos usando un servidor web simple (por ejemplo, `python -m http.server` o `npx serve`):
     ```bash
-    python -m http.server
+    # Usando Python 3
+    python3 -m http.server 8000
+    # O si prefiere Node.js
+    # npm install -g serve
+    # serve
     ```
-    If you prefer Node.js, you can install `http-server` globally:
-    ```bash
-    npm install -g http-server
-    http-server
-    ```
+    Luego, acceda a `http://localhost:8000` en su navegador.
 
-4.  **Access the Application:**
-    Open your web browser and navigate to `http://localhost:8000` (or the port specified by your local server).
+## 💡 Uso
 
-## 💡 Usage
+Una vez que el proyecto esté cargado en su navegador, podrá interactuar con el modelo de IA. La interfaz principal se encuentra en `index.html`.
 
-Once the application is running locally, you can interact with the offline AI.
+### Ejemplo de Interacción
 
-### Basic Interaction
+(Nota: La interacción específica dependerá de la implementación del modelo wllama y la interfaz de usuario desarrollada. A continuación, se presenta un ejemplo genérico.)
 
-Navigate to the main page (`index.html`) in your browser. You should be presented with an interface to interact with the AI. Input your queries or prompts in the designated area and observe the AI's responses.
+1.  Ingrese su consulta o prompt en el campo de texto proporcionado.
+2.  Presione "Enviar" o la tecla Enter.
+3.  La IA procesará su solicitud y generará una respuesta directamente en la interfaz.
 
-### Understanding the Structure
+```html
+<!-- Ejemplo simplificado de la interfaz de usuario -->
+<div class="chat-container">
+    <div id="chat-output">
+        <!-- Aquí se mostrarán los mensajes y respuestas -->
+    </div>
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Escribe tu pregunta aquí...">
+        <button id="send-button">Enviar</button>
+    </div>
+</div>
+```
 
-*   `index.html`: The main entry point for the application.
-*   `offline.html`: A page displayed when the application cannot be accessed offline.
-*   `install.html`: Potentially used for guiding users through PWA installation.
-*   `sw.js`: The service worker script responsible for offline caching and functionality.
-*   `assets/`: Contains compiled JavaScript and CSS files, as well as WebAssembly modules (`.wasm`).
-*   `icons/`: Application icons for various resolutions.
-*   `custom-whyai.css`, `high.css`: Custom stylesheet files.
+```javascript
+// Ejemplo simplificado de la lógica de interacción
+document.getElementById('send-button').addEventListener('click', async () => {
+    const userInput = document.getElementById('user-input').value;
+    if (!userInput) return;
 
-## 🤝 Contributing
+    // Añadir mensaje del usuario al chat
+    appendMessage('user', userInput);
 
-We welcome contributions to `ia-offline`. If you would like to contribute, please follow these guidelines:
+    // Lógica para enviar la entrada al modelo wllama (implementación a definir)
+    // const aiResponse = await processWithWllama(userInput);
 
-1.  **Fork the Repository:** Create a fork of this repository on GitHub.
-2.  **Create a New Branch:** Make your changes in a new branch.
-    ```bash
-    git checkout -b feature/your-feature-name
-    ```
-3.  **Commit Your Changes:** Write clear and concise commit messages.
-    ```bash
-    git commit -m "Add some amazing feature"
-    ```
-4.  **Push to the Branch:**
-    ```bash
-    git push origin feature/your-feature-name
-    ```
-5.  **Open a Pull Request:** Submit a pull request to the main repository.
+    // Simulación de respuesta de la IA
+    const aiResponse = `Respuesta simulada a: "${userInput}"`;
+    appendMessage('ai', aiResponse);
 
-Please ensure your contributions adhere to the project's coding standards and best practices.
+    document.getElementById('user-input').value = '';
+});
 
-## 📜 License
+function appendMessage(sender, message) {
+    const chatOutput = document.getElementById('chat-output');
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message', sender);
+    messageElement.textContent = message;
+    chatOutput.appendChild(messageElement);
+    chatOutput.scrollTop = chatOutput.scrollHeight; // Scroll to bottom
+}
+```
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+## 📚 Documentación de la API
+
+Este proyecto se enfoca en la ejecución local de modelos de IA. La interacción principal se realiza a través de la interfaz de usuario y las funcionalidades expuestas por **wllama** en el lado del cliente (JavaScript y WebAssembly).
+
+### Funciones Clave (Lado del Cliente)
+
+*   `loadModel(modelPath)`: Carga un modelo wllama desde una ruta especificada.
+*   `generateText(prompt, options)`: Genera texto basado en un prompt y opciones de configuración (temperatura, longitud, etc.).
+*   `preprocessInput(text)`: Prepara el texto de entrada para el modelo.
+*   `postprocessOutput(text)`: Formatea la salida generada por el modelo.
+
+(Nota: La documentación detallada de la API de wllama se encuentra en la documentación oficial de wllama, ya que este proyecto es un consumidor de dicha biblioteca.)
+
+## 📄 Licencia
+
+Este proyecto no especifica una licencia. Por favor, consulte el repositorio para obtener información detallada sobre los derechos de uso y distribución.
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, consulte el archivo `CONTRIBUTING.md` (si existe) para conocer las directrices.
+
+## ⚠️ Advertencia
+
+Este proyecto utiliza WebAssembly (`.wasm`) para ejecutar modelos de IA en el navegador. El rendimiento y la compatibilidad pueden variar según el navegador y el dispositivo. La eficiencia de la IA sin conexión depende en gran medida del tamaño y la complejidad del modelo cargado.
 
 ---
 
