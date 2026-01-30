@@ -16,7 +16,9 @@ El proyecto sigue una filosofía **privacy-first**: sin cuentas, sin backend pro
 
 ## 📜 Licencia
 
-Este proyecto no es Open-Source es únicamente creado con fines demostrativos.
+**Todos los derechos reservados**
+
+Este proyecto **no es Open-Source** es únicamente creado con fines demostrativos.
 
 ---
 
