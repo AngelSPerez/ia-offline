@@ -255,8 +255,8 @@ Se agradece especialmente:
 - **wllama** — motor base para la ejecución de modelos LLM en el navegador (modo offline)
 - **Modelos**: LLaMA (Meta) y Gemma (Google).
 - **Stack**: Núcleo en Vanilla JS con integración de React para el módulo offline.
-- Deploy (Online): Vercel.
-- Página Web: GitHub Pages.
+- **Deploy** (Online): Vercel.
+- **Página Web**: GitHub Pages.
 
 ---
 
