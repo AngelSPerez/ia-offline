@@ -4,8 +4,6 @@
     
     <meta charset="UTF-8">
 
-    <script src="https://js.puter.com/v2/"></script>
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalabe=no">
     <title>WhyAI</title>
     
@@ -762,7 +760,7 @@
   <div class="image-modal-box">
     <h2 id="img-title">Generador de Imágenes</h2>
     <p class="image-modal-subtitle" id="img-subtitle" style="margin-bottom: 0px;">Crea imágenes con inteligencia artificial</p>
-    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Powered by Puter.js</p>
+    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Free API</p>
 
     <!-- Sugerencias -->
     <div class="suggestions">
@@ -961,12 +959,6 @@
       return;
     }
 
-    // Verificar que Puter.js esté cargado
-    if (typeof puter === 'undefined') {
-      alert('Error: Puter.js no se ha cargado correctamente. Por favor, recarga la página.');
-      return;
-    }
-
     const style = document.getElementById('image-style').value;
     const finalPrompt = style ? `${prompt}, ${style} style` : prompt;
 
@@ -980,30 +972,32 @@
     document.getElementById('image-result').style.display = 'none';
 
     try {
-      // Generar imagen con Puter.js usando Stable Diffusion 3
-      const result = await puter.ai.txt2img(finalPrompt, {
-        model: "stabilityai/stable-diffusion-3-medium"
-      });
+      // Usar Hugging Face Inference API (modelo público gratuito)
+      const response = await fetch(
+        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            inputs: finalPrompt,
+            options: { wait_for_model: true }
+          }),
+        }
+      );
 
-      // Verificar que tengamos un resultado válido
-      if (!result) {
-        throw new Error('No se recibió respuesta del servidor');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Convertir el resultado a URL de imagen
-      let imageUrl;
+      const blob = await response.blob();
       
-      // Intentar diferentes métodos para obtener la imagen
-      if (result.blob) {
-        const blob = await result.blob();
-        imageUrl = URL.createObjectURL(blob);
-      } else if (result instanceof Blob) {
-        imageUrl = URL.createObjectURL(result);
-      } else if (typeof result === 'string') {
-        imageUrl = result;
-      } else {
-        throw new Error('Formato de respuesta no reconocido');
+      if (blob.size === 0) {
+        throw new Error('La respuesta está vacía');
       }
+
+      const imageUrl = URL.createObjectURL(blob);
 
       // Mostrar la imagen
       currentImageUrl = imageUrl;
@@ -1214,15 +1208,6 @@
   // Inicializar
   detectarIdioma();
   mostrarWelcomeModal();
-
-  // Verificar que Puter.js se haya cargado
-  window.addEventListener('load', () => {
-    if (typeof puter === 'undefined') {
-      console.error('Puter.js no se cargó correctamente');
-    } else {
-      console.log('Puter.js cargado correctamente');
-    }
-  });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
