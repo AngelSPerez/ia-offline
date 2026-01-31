@@ -276,6 +276,21 @@ Se agradece especialmente:
 
 ---
 
+## 🖥️ Capturas
+
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/0c596894-7ff4-49bc-83f8-6f879a2b55e8" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/1499f493-c274-4735-ac0c-dc854c1647d9" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/f42bc8a0-21e5-4531-a3a4-b0c7e2f50260" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/db6d44ff-9bc5-49f9-92b7-74fd7c4f1acd" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/f2021afe-31e6-4447-81d1-794d652cb88e" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/6b882ab5-e14f-4616-be30-3e199417388b" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/957e7ceb-0852-43df-b7d2-3a57d117a7b7" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/b761831d-d455-4b98-af62-832684f25a21" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/68c6badd-fbb8-406d-9f28-a931c9d62b75" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/2ee729a1-c0ad-47a3-b534-6f109f7e2461" />
+
+---
+
 ## ❓ FAQ
 
 ### ¿WhyAI es realmente offline?
