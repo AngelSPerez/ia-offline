@@ -288,6 +288,11 @@ Se agradece especialmente:
 <img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/b761831d-d455-4b98-af62-832684f25a21" />
 <img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/68c6badd-fbb8-406d-9f28-a931c9d62b75" />
 <img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/2ee729a1-c0ad-47a3-b534-6f109f7e2461" />
+<img width="1912" height="994" alt="image" src="https://github.com/user-attachments/assets/5a37910d-7163-46c0-bbf8-908a21ae0e8a" />
+<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/c96da523-8684-4000-80a8-90de89870dfa" />
+<img width="420" height="420" alt="image" src="https://github.com/user-attachments/assets/28c7b997-d6cf-4843-9490-b08bdbbfaad6" />
+
+
 
 ---
 
