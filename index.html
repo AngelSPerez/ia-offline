@@ -4,6 +4,8 @@
     
     <meta charset="UTF-8">
 
+    <script src="https://js.puter.com/v2/"></script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalabe=no">
     <title>WhyAI</title>
     
@@ -18,8 +20,6 @@
     <link rel="icon" href="icons/512.png">
 
     <link rel="stylesheet" href="high.css">
-
-    <script src="https://js.puter.com/v2/"></script>
 
     <style>
       body, html {
@@ -961,6 +961,12 @@
       return;
     }
 
+    // Verificar que Puter.js esté cargado
+    if (typeof puter === 'undefined') {
+      alert('Error: Puter.js no se ha cargado correctamente. Por favor, recarga la página.');
+      return;
+    }
+
     const style = document.getElementById('image-style').value;
     const finalPrompt = style ? `${prompt}, ${style} style` : prompt;
 
@@ -979,9 +985,25 @@
         model: "stabilityai/stable-diffusion-3-medium"
       });
 
+      // Verificar que tengamos un resultado válido
+      if (!result) {
+        throw new Error('No se recibió respuesta del servidor');
+      }
+
       // Convertir el resultado a URL de imagen
-      const blob = await result.blob();
-      const imageUrl = URL.createObjectURL(blob);
+      let imageUrl;
+      
+      // Intentar diferentes métodos para obtener la imagen
+      if (result.blob) {
+        const blob = await result.blob();
+        imageUrl = URL.createObjectURL(blob);
+      } else if (result instanceof Blob) {
+        imageUrl = URL.createObjectURL(result);
+      } else if (typeof result === 'string') {
+        imageUrl = result;
+      } else {
+        throw new Error('Formato de respuesta no reconocido');
+      }
 
       // Mostrar la imagen
       currentImageUrl = imageUrl;
@@ -996,17 +1018,25 @@
       };
 
       img.onerror = () => {
-        throw new Error('Error al cargar la imagen');
+        loadingSpinner.classList.remove('active');
+        loadingText.classList.remove('active');
+        generateBtn.disabled = false;
+        throw new Error('Error al cargar la imagen generada');
       };
 
       img.src = imageUrl;
 
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error completo:', error);
       loadingSpinner.classList.remove('active');
       loadingText.classList.remove('active');
       generateBtn.disabled = false;
-      alert(translations[currentLang].generationError + ' ' + error.message);
+      
+      let errorMessage = translations[currentLang].generationError;
+      if (error.message) {
+        errorMessage += '\n\nDetalle: ' + error.message;
+      }
+      alert(errorMessage);
     }
   }
 
@@ -1184,6 +1214,15 @@
   // Inicializar
   detectarIdioma();
   mostrarWelcomeModal();
+
+  // Verificar que Puter.js se haya cargado
+  window.addEventListener('load', () => {
+    if (typeof puter === 'undefined') {
+      console.error('Puter.js no se cargó correctamente');
+    } else {
+      console.log('Puter.js cargado correctamente');
+    }
+  });
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
