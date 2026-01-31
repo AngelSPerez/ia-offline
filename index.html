@@ -760,7 +760,7 @@
   <div class="image-modal-box">
     <h2 id="img-title">Generador de Imágenes</h2>
     <p class="image-modal-subtitle" id="img-subtitle" style="margin-bottom: 0px;">Crea imágenes con inteligencia artificial</p>
-    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Free API</p>
+    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Powered by Pollinations AI</p>
 
     <!-- Sugerencias -->
     <div class="suggestions">
@@ -932,7 +932,7 @@
   let currentLang = 'en';
   let currentImageUrl = '';
 
-  // ✅ FUNCIONES MODAL GENERADOR DE IMÁGENES CON AI HORDE
+  // ✅ FUNCIONES MODAL GENERADOR DE IMÁGENES CON POLLINATIONS AI
   function usarSugerencia(element) {
     const prompt = currentLang === 'es' ? element.dataset.es : element.dataset.en;
     document.getElementById('image-prompt').value = prompt;
@@ -972,20 +972,16 @@
     document.getElementById('image-result').style.display = 'none';
 
     try {
-      // Usar Hugging Face Inference API (modelo público gratuito)
-      const response = await fetch(
-        "https://router.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            inputs: finalPrompt,
-            options: { wait_for_model: true }
-          }),
+      // Usar Pollinations AI API con modelo flux
+      const encodedPrompt = encodeURIComponent(finalPrompt);
+      const apiUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`;
+      
+      const response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer pk_q90ksnyaNiMIvTma'
         }
-      );
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
