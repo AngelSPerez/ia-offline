@@ -973,49 +973,42 @@
     document.getElementById('image-result').style.display = 'none';
 
     try {
-      // Usar Pollinations AI API con modelo flux
+      // Usar Pollinations AI API - cargar directamente en img tag
       const encodedPrompt = encodeURIComponent(finalPrompt);
-      const apiUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?model=flux&width=1024&height=1024&nologo=true`;
       
-      const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Authorization': 'Bearer pk_q90ksnyaNiMIvTma'
-        }
+      currentImageUrl = imageUrl;
+      
+      // Crear imagen con timeout
+      const img = new Image();
+      let timeoutId;
+      
+      const loadPromise = new Promise((resolve, reject) => {
+        timeoutId = setTimeout(() => {
+          reject(new Error('timeout'));
+        }, 60000);
+        
+        img.onload = () => {
+          clearTimeout(timeoutId);
+          resolve();
+        };
+        
+        img.onerror = () => {
+          clearTimeout(timeoutId);
+          reject(new Error('Error al cargar la imagen'));
+        };
+        
+        img.src = imageUrl;
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const blob = await response.blob();
+      await loadPromise;
       
-      if (blob.size === 0) {
-        throw new Error('La respuesta está vacía');
-      }
-
-      const imageUrl = URL.createObjectURL(blob);
-
       // Mostrar la imagen
-      currentImageUrl = imageUrl;
-      const img = new Image();
-      
-      img.onload = () => {
-        document.getElementById('generated-image').src = imageUrl;
-        loadingSpinner.classList.remove('active');
-        loadingText.classList.remove('active');
-        generateBtn.disabled = false;
-        document.getElementById('image-result').style.display = 'block';
-      };
-
-      img.onerror = () => {
-        loadingSpinner.classList.remove('active');
-        loadingText.classList.remove('active');
-        generateBtn.disabled = false;
-        throw new Error('Error al cargar la imagen generada');
-      };
-
-      img.src = imageUrl;
+      document.getElementById('generated-image').src = imageUrl;
+      loadingSpinner.classList.remove('active');
+      loadingText.classList.remove('active');
+      generateBtn.disabled = false;
+      document.getElementById('image-result').style.display = 'block';
 
     } catch (error) {
       console.error('Error completo:', error);
@@ -1024,9 +1017,13 @@
       generateBtn.disabled = false;
       
       let errorMessage = translations[currentLang].generationError;
-      if (error.message) {
-        errorMessage += '\n\nDetalle: ' + error.message;
+      
+      if (error.message === 'timeout') {
+        errorMessage = translations[currentLang].generationTimeout + '\n\nLa API puede estar saturada. Intenta de nuevo en unos momentos.';
+      } else if (error.message) {
+        errorMessage += '\n\n' + error.message;
       }
+      
       alert(errorMessage);
     }
   }
@@ -1035,9 +1032,11 @@
     if (!currentImageUrl) return;
     
     try {
+      // Para URLs directas, usar un link temporal
       const a = document.createElement('a');
       a.href = currentImageUrl;
       a.download = `whyai-${Date.now()}.png`;
+      a.target = '_blank';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1206,11 +1205,14 @@
   detectarIdioma();
   mostrarWelcomeModal();
 
+  // Service Worker desactivado temporalmente por conflicto CORS con Pollinations
+  /*
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/ia-offline/sw.js');
     });
   }
+  */
 </script>
 
 </body>
