@@ -19,6 +19,8 @@
 
     <link rel="stylesheet" href="high.css">
 
+    <script src="https://js.puter.com/v2/"></script>
+
     <style>
       body, html {
         touch-action: none;
@@ -760,7 +762,7 @@
   <div class="image-modal-box">
     <h2 id="img-title">Generador de Imágenes</h2>
     <p class="image-modal-subtitle" id="img-subtitle" style="margin-bottom: 0px;">Crea imágenes con inteligencia artificial</p>
-    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Powered by AI Horde</p>
+    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Powered by Puter.js</p>
 
     <!-- Sugerencias -->
     <div class="suggestions">
@@ -972,70 +974,16 @@
     document.getElementById('image-result').style.display = 'none';
 
     try {
-      // Paso 1: Enviar solicitud de generación a AI Horde
-      const submitResponse = await fetch('https://aihorde.net/api/v2/generate/async', {
-        method: 'POST',
-        headers: {
-          'apikey': '0000000000',
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          prompt: finalPrompt,
-          params: {
-            width: 512,
-            height: 512,
-            steps: 30,
-            n: 1
-          }
-        })
+      // Generar imagen con Puter.js usando Stable Diffusion 3
+      const result = await puter.ai.txt2img(finalPrompt, {
+        model: "stabilityai/stable-diffusion-3-medium"
       });
 
-      if (!submitResponse.ok) {
-        throw new Error('Error al enviar solicitud');
-      }
+      // Convertir el resultado a URL de imagen
+      const blob = await result.blob();
+      const imageUrl = URL.createObjectURL(blob);
 
-      const submitData = await submitResponse.json();
-      const jobId = submitData.id;
-
-      // Paso 2: Polling para verificar el estado
-      let imageUrl = null;
-      let attempts = 0;
-      const maxAttempts = 60; // 60 intentos = 2 minutos máximo
-
-      while (!imageUrl && attempts < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos entre intentos
-
-        const statusResponse = await fetch(`https://aihorde.net/api/v2/generate/status/${jobId}`, {
-          headers: {
-            'apikey': 'wCKB-bOt86Lkw8KM38O8HA'
-          }
-        });
-
-        if (!statusResponse.ok) {
-          throw new Error('Error al verificar estado');
-        }
-
-        const statusData = await statusResponse.json();
-
-        // Actualizar texto de carga con progreso
-        if (statusData.queue_position !== undefined) {
-          loadingText.textContent = `${translations[currentLang].loadingText} (${currentLang === 'es' ? 'Posición en cola' : 'Queue position'}: ${statusData.queue_position})`;
-        }
-
-        // Verificar si la imagen está lista
-        if (statusData.done && statusData.generations && statusData.generations.length > 0) {
-          imageUrl = statusData.generations[0].img;
-          break;
-        }
-
-        attempts++;
-      }
-
-      if (!imageUrl) {
-        throw new Error(translations[currentLang].generationTimeout);
-      }
-
-      // Paso 3: Mostrar la imagen
+      // Mostrar la imagen
       currentImageUrl = imageUrl;
       const img = new Image();
       
@@ -1043,7 +991,6 @@
         document.getElementById('generated-image').src = imageUrl;
         loadingSpinner.classList.remove('active');
         loadingText.classList.remove('active');
-        loadingText.textContent = translations[currentLang].loadingText;
         generateBtn.disabled = false;
         document.getElementById('image-result').style.display = 'block';
       };
@@ -1058,7 +1005,6 @@
       console.error('Error:', error);
       loadingSpinner.classList.remove('active');
       loadingText.classList.remove('active');
-      loadingText.textContent = translations[currentLang].loadingText;
       generateBtn.disabled = false;
       alert(translations[currentLang].generationError + ' ' + error.message);
     }
@@ -1068,16 +1014,12 @@
     if (!currentImageUrl) return;
     
     try {
-      const response = await fetch(currentImageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = currentImageUrl;
       a.download = `whyai-${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error:', error);
       alert(translations[currentLang].downloadError);
