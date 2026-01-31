@@ -762,6 +762,13 @@
     <h2 id="img-title">Generador de Imágenes</h2>
     <p class="image-modal-subtitle" id="img-subtitle" style="margin-bottom: 0px;">Crea imágenes con inteligencia artificial</p>
     <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Powered by Pollinations AI</p>
+    <p style="color:#ff9800; font-size: 0.8rem; margin-top: 8px; font-weight: 600;" id="img-limit">⚠️ Límite: 1 imagen por día por IP</p>
+
+    <!-- Mensaje de bloqueo (oculto por defecto) -->
+    <div id="blocked-message" style="display: none; background: #ff5722; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+      <h3 style="margin: 0 0 8px 0; font-size: 1.1rem;" id="img-blocked">Ya generaste tu imagen de hoy</h3>
+      <p style="margin: 0; font-size: 0.9rem;" id="img-try-tomorrow">Podrás generar otra imagen mañana. El límite se restablece cada 24 horas.</p>
+    </div>
 
     <!-- Sugerencias -->
     <div class="suggestions">
@@ -819,9 +826,6 @@
         <button class="action-btn" onclick="descargarImagen()">
           <span id="download-text">Descargar</span>
         </button>
-        <button class="action-btn" onclick="nuevaImagen()">
-          <span id="new-text">Nueva imagen</span>
-        </button>
       </div>
     </div>
 
@@ -865,11 +869,14 @@
       offlineMsgText: "No te preocupes: WhyAI cuenta con un modo 'Offline', que te permite seguir disfrutando de la inteligencia artificial sin necesidad de conexión a Internet, siempre que la hayas descargado previamente.",
       imgTitle: "Generador de Imágenes",
       imgSubtitle: "Crea imágenes con inteligencia artificial",
+      imgLimit: "⚠️ Límite: 1 imagen por día por IP",
       imgPlaceholder: "Describe la imagen que quieres generar...",
       imgGenerate: "Generar Imagen",
       imgDownload: "Descargar",
       imgNew: "Nueva imagen",
       imgClose: "Cerrar",
+      imgBlocked: "Ya generaste tu imagen de hoy",
+      imgTryTomorrow: "Podrás generar otra imagen mañana. El límite se restablece cada 24 horas.",
       styleLabel: "Estilo",
       suggestionsTitle: "Sugerencias:",
       loadingText: "Generando tu imagen...",
@@ -905,11 +912,14 @@
       offlineMsgText: "Don't worry: WhyAI has an 'Offline' mode that lets you continue enjoying AI without internet connection, as long as you've downloaded it previously.",
       imgTitle: "AI Image Generator",
       imgSubtitle: "Create amazing images with artificial intelligence",
+      imgLimit: "⚠️ Limit: 1 image per day per IP",
       imgPlaceholder: "Describe the image you want to generate...",
       imgGenerate: "Generate Image",
       imgDownload: "Download",
       imgNew: "New image",
       imgClose: "Close",
+      imgBlocked: "You already generated your image today",
+      imgTryTomorrow: "You can generate another image tomorrow. The limit resets every 24 hours.",
       styleLabel: "Style",
       suggestionsTitle: "Quick suggestions:",
       loadingText: "Generating your image...",
@@ -946,7 +956,39 @@
   }
 
   function abrirImageModal() {
-    document.getElementById('image-modal').classList.add('active');
+    const modal = document.getElementById('image-modal');
+    modal.classList.add('active');
+    
+    // Verificar si ya generó hoy
+    const lastGenerated = localStorage.getItem('whyai-last-image-date');
+    const today = new Date().toDateString();
+    
+    if (lastGenerated === today) {
+      // Ya generó hoy - mostrar mensaje de bloqueo y deshabilitar formulario
+      document.getElementById('blocked-message').style.display = 'block';
+      document.getElementById('image-prompt').disabled = true;
+      document.getElementById('image-style').disabled = true;
+      document.getElementById('img-generate-btn').disabled = true;
+      document.querySelector('.suggestions').style.display = 'none';
+      
+      // Mostrar la última imagen si existe
+      const lastImageUrl = localStorage.getItem('whyai-last-image-url');
+      if (lastImageUrl) {
+        currentImageUrl = lastImageUrl;
+        document.getElementById('generated-image').src = lastImageUrl;
+        document.getElementById('image-result').style.display = 'block';
+      }
+    } else {
+      // Resetear el modal para un nuevo día
+      document.getElementById('blocked-message').style.display = 'none';
+      document.getElementById('image-prompt').disabled = false;
+      document.getElementById('image-prompt').value = '';
+      document.getElementById('image-style').disabled = false;
+      document.getElementById('img-generate-btn').disabled = false;
+      document.getElementById('image-result').style.display = 'none';
+      document.querySelector('.suggestions').style.display = 'block';
+      actualizarContador();
+    }
   }
 
   function cerrarImageModal() {
@@ -954,6 +996,22 @@
   }
 
   async function generarImagen() {
+    // Verificar si ya generó hoy
+    const lastGenerated = localStorage.getItem('whyai-last-image-date');
+    const today = new Date().toDateString();
+    
+    if (lastGenerated === today) {
+      // Ya generó hoy - mostrar mensaje de bloqueo
+      document.getElementById('blocked-message').style.display = 'block';
+      document.getElementById('image-prompt').disabled = true;
+      document.getElementById('image-style').disabled = true;
+      document.getElementById('img-generate-btn').disabled = true;
+      
+      // Ocultar sugerencias
+      document.querySelector('.suggestions').style.display = 'none';
+      return;
+    }
+
     const prompt = document.getElementById('image-prompt').value.trim();
     if (!prompt) {
       alert(translations[currentLang].promptError);
@@ -1003,12 +1061,23 @@
 
       await loadPromise;
       
+      // Guardar fecha de generación
+      localStorage.setItem('whyai-last-image-date', today);
+      localStorage.setItem('whyai-last-image-url', imageUrl);
+      
       // Mostrar la imagen
       document.getElementById('generated-image').src = imageUrl;
       loadingSpinner.classList.remove('active');
       loadingText.classList.remove('active');
-      generateBtn.disabled = false;
       document.getElementById('image-result').style.display = 'block';
+      
+      // Bloquear el formulario
+      document.getElementById('image-prompt').disabled = true;
+      document.getElementById('image-style').disabled = true;
+      document.querySelector('.suggestions').style.display = 'none';
+      
+      // Mostrar mensaje de bloqueo
+      document.getElementById('blocked-message').style.display = 'block';
 
     } catch (error) {
       console.error('Error completo:', error);
@@ -1032,7 +1101,24 @@
     if (!currentImageUrl) return;
     
     try {
-      // Para URLs directas, usar un link temporal
+      // Hacer fetch de la imagen para descargarla como blob
+      const response = await fetch(currentImageUrl);
+      const blob = await response.blob();
+      
+      // Crear URL del blob y descargar
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `whyai-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Limpiar URL del blob
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Error:', error);
+      // Si fetch falla, intentar descarga directa
       const a = document.createElement('a');
       a.href = currentImageUrl;
       a.download = `whyai-${Date.now()}.png`;
@@ -1040,9 +1126,6 @@
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-    } catch (error) {
-      console.error('Error:', error);
-      alert(translations[currentLang].downloadError);
     }
   }
 
@@ -1088,10 +1171,12 @@
     // ✅ TRADUCIR MODAL GENERADOR DE IMÁGENES
     document.getElementById('img-title').textContent = t.imgTitle;
     document.getElementById('img-subtitle').textContent = t.imgSubtitle;
+    document.getElementById('img-limit').textContent = t.imgLimit;
+    document.getElementById('img-blocked').textContent = t.imgBlocked;
+    document.getElementById('img-try-tomorrow').textContent = t.imgTryTomorrow;
     document.getElementById('image-prompt').placeholder = t.imgPlaceholder;
     document.getElementById('img-generate-btn').textContent = t.imgGenerate;
     document.getElementById('download-text').textContent = t.imgDownload;
-    document.getElementById('new-text').textContent = t.imgNew;
     document.getElementById('img-close-btn').textContent = t.imgClose;
     document.getElementById('style-label').textContent = t.styleLabel;
     document.getElementById('suggestions-title').textContent = t.suggestionsTitle;
@@ -1205,14 +1290,13 @@
   detectarIdioma();
   mostrarWelcomeModal();
 
-  // Service Worker desactivado temporalmente por conflicto CORS con Pollinations
-  /*
+
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/ia-offline/sw.js');
     });
   }
-  */
+
 </script>
 
 </body>
