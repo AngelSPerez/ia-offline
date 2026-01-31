@@ -129,14 +129,14 @@ WhyAI permite la **generación de imágenes** mediante una **API pública extern
 - El proceso es **bloqueante dentro del modal**
 - La imagen generada se muestra **en la parte inferior del mismo modal**
 - El usuario puede cerrar el modal y seguir usando el chat mientras la imagen se genera
-- El usuario decide si desea **descargarla** o generar una nueva
+- El usuario decide si desea **descargarla**
 
 ### Características y limitaciones
 
 - Tipo de modelo: **no especificado por el proveedor**
 - Resolución y relación de aspecto: **fijas** (limitación de la API)
 - Solo se admite **texto**
-- Límite: **5 imágenes por día**, por IP
+- Límite: **1 imágen por día** (limitación de la API)
 - El usuario es notificado al alcanzar el límite
 
 ### Privacidad
