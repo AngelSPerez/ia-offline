@@ -760,7 +760,7 @@
   <div class="image-modal-box">
     <h2 id="img-title">Generador de Imágenes</h2>
     <p class="image-modal-subtitle" id="img-subtitle" style="margin-bottom: 0px;">Crea imágenes con inteligencia artificial</p>
-    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Image generation limit: 5</p>
+    <p style="color:#999; font-size: 0.7rem; margin-top: 2px;">Powered by AI Horde</p>
 
     <!-- Sugerencias -->
     <div class="suggestions">
@@ -875,6 +875,7 @@
       promptError: "Por favor, describe la imagen que deseas generar",
       downloadError: "Error al descargar la imagen",
       generationError: "Error al generar la imagen. Inténtalo de nuevo.",
+      generationTimeout: "Tiempo de espera agotado. El servidor está ocupado, intenta de nuevo.",
       styleNone: "Sin estilo específico",
       stylePhoto: "Fotorrealista",
       styleAnime: "Anime",
@@ -914,6 +915,7 @@
       promptError: "Please describe the image you want to generate",
       downloadError: "Error downloading image",
       generationError: "Error generating image. Please try again.",
+      generationTimeout: "Request timeout. Server is busy, please try again.",
       styleNone: "No specific style",
       stylePhoto: "Photorealistic",
       styleAnime: "Anime",
@@ -930,7 +932,7 @@
   let currentLang = 'en';
   let currentImageUrl = '';
 
-  // ✅ FUNCIONES MODAL GENERADOR DE IMÁGENES
+  // ✅ FUNCIONES MODAL GENERADOR DE IMÁGENES CON AI HORDE
   function usarSugerencia(element) {
     const prompt = currentLang === 'es' ? element.dataset.es : element.dataset.en;
     document.getElementById('image-prompt').value = prompt;
@@ -950,7 +952,7 @@
     document.getElementById('image-modal').classList.remove('active');
   }
 
-  function generarImagen() {
+  async function generarImagen() {
     const prompt = document.getElementById('image-prompt').value.trim();
     if (!prompt) {
       alert(translations[currentLang].promptError);
@@ -969,27 +971,97 @@
     loadingText.classList.add('active');
     document.getElementById('image-result').style.display = 'none';
 
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
-    
-    const img = new Image();
-    img.onload = () => {
-      currentImageUrl = url;
-      document.getElementById('generated-image').src = url;
+    try {
+      // Paso 1: Enviar solicitud de generación a AI Horde
+      const submitResponse = await fetch('https://aihorde.net/api/v2/generate/async', {
+        method: 'POST',
+        headers: {
+          'apikey': '0000000000',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: finalPrompt,
+          params: {
+            width: 512,
+            height: 512,
+            steps: 30,
+            n: 1
+          }
+        })
+      });
+
+      if (!submitResponse.ok) {
+        throw new Error('Error al enviar solicitud');
+      }
+
+      const submitData = await submitResponse.json();
+      const jobId = submitData.id;
+
+      // Paso 2: Polling para verificar el estado
+      let imageUrl = null;
+      let attempts = 0;
+      const maxAttempts = 60; // 60 intentos = 2 minutos máximo
+
+      while (!imageUrl && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Esperar 2 segundos entre intentos
+
+        const statusResponse = await fetch(`https://aihorde.net/api/v2/generate/status/${jobId}`, {
+          headers: {
+            'apikey': '0000000000'
+          }
+        });
+
+        if (!statusResponse.ok) {
+          throw new Error('Error al verificar estado');
+        }
+
+        const statusData = await statusResponse.json();
+
+        // Actualizar texto de carga con progreso
+        if (statusData.queue_position !== undefined) {
+          loadingText.textContent = `${translations[currentLang].loadingText} (${currentLang === 'es' ? 'Posición en cola' : 'Queue position'}: ${statusData.queue_position})`;
+        }
+
+        // Verificar si la imagen está lista
+        if (statusData.done && statusData.generations && statusData.generations.length > 0) {
+          imageUrl = statusData.generations[0].img;
+          break;
+        }
+
+        attempts++;
+      }
+
+      if (!imageUrl) {
+        throw new Error(translations[currentLang].generationTimeout);
+      }
+
+      // Paso 3: Mostrar la imagen
+      currentImageUrl = imageUrl;
+      const img = new Image();
       
+      img.onload = () => {
+        document.getElementById('generated-image').src = imageUrl;
+        loadingSpinner.classList.remove('active');
+        loadingText.classList.remove('active');
+        loadingText.textContent = translations[currentLang].loadingText;
+        generateBtn.disabled = false;
+        document.getElementById('image-result').style.display = 'block';
+      };
+
+      img.onerror = () => {
+        throw new Error('Error al cargar la imagen');
+      };
+
+      img.src = imageUrl;
+
+    } catch (error) {
+      console.error('Error:', error);
       loadingSpinner.classList.remove('active');
       loadingText.classList.remove('active');
+      loadingText.textContent = translations[currentLang].loadingText;
       generateBtn.disabled = false;
-      document.getElementById('image-result').style.display = 'block';
-    };
-    
-    img.onerror = () => {
-      loadingSpinner.classList.remove('active');
-      loadingText.classList.remove('active');
-      generateBtn.disabled = false;
-      alert(translations[currentLang].generationError);
-    };
-    
-    img.src = url;
+      alert(translations[currentLang].generationError + ' ' + error.message);
+    }
   }
 
   async function descargarImagen() {
