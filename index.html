@@ -995,29 +995,34 @@
     document.getElementById('image-modal').classList.remove('active');
   }
 
-  async function generarImagen() {
-    // Verificar si ya generó hoy
-    const lastGenerated = localStorage.getItem('whyai-last-image-date');
-    const today = new Date().toDateString();
+  async function generarImagen(reintentoActual = 0) {
+    const maxReintentos = 2; // Total de 3 intentos (inicial + 2 reintentos)
     
-    if (lastGenerated === today) {
-      // Ya generó hoy - mostrar mensaje de bloqueo
-      document.getElementById('blocked-message').style.display = 'block';
-      document.getElementById('image-prompt').disabled = true;
-      document.getElementById('image-style').disabled = true;
-      document.getElementById('img-generate-btn').disabled = true;
+    // Verificar si ya generó hoy (solo en el primer intento)
+    if (reintentoActual === 0) {
+      const lastGenerated = localStorage.getItem('whyai-last-image-date');
+      const today = new Date().toDateString();
       
-      // Ocultar sugerencias
-      document.querySelector('.suggestions').style.display = 'none';
-      return;
+      if (lastGenerated === today) {
+        // Ya generó hoy - mostrar mensaje de bloqueo
+        document.getElementById('blocked-message').style.display = 'block';
+        document.getElementById('image-prompt').disabled = true;
+        document.getElementById('image-style').disabled = true;
+        document.getElementById('img-generate-btn').disabled = true;
+        
+        // Ocultar sugerencias
+        document.querySelector('.suggestions').style.display = 'none';
+        return;
+      }
+
+      const prompt = document.getElementById('image-prompt').value.trim();
+      if (!prompt) {
+        alert(translations[currentLang].promptError);
+        return;
+      }
     }
 
     const prompt = document.getElementById('image-prompt').value.trim();
-    if (!prompt) {
-      alert(translations[currentLang].promptError);
-      return;
-    }
-
     const style = document.getElementById('image-style').value;
     const finalPrompt = style ? `${prompt}, ${style} style` : prompt;
 
@@ -1037,14 +1042,14 @@
       
       currentImageUrl = imageUrl;
       
-      // Crear imagen con timeout
+      // Crear imagen con timeout aumentado a 120 segundos
       const img = new Image();
       let timeoutId;
       
       const loadPromise = new Promise((resolve, reject) => {
         timeoutId = setTimeout(() => {
           reject(new Error('timeout'));
-        }, 60000);
+        }, 120000); // Aumentado a 120 segundos (2 minutos)
         
         img.onload = () => {
           clearTimeout(timeoutId);
@@ -1062,6 +1067,7 @@
       await loadPromise;
       
       // Guardar fecha de generación
+      const today = new Date().toDateString();
       localStorage.setItem('whyai-last-image-date', today);
       localStorage.setItem('whyai-last-image-url', imageUrl);
       
@@ -1080,7 +1086,17 @@
       document.getElementById('blocked-message').style.display = 'block';
 
     } catch (error) {
-      console.error('Error completo:', error);
+      console.error('Error en intento', reintentoActual + 1, ':', error);
+      
+      // Si no hemos alcanzado el máximo de reintentos, intentar de nuevo automáticamente
+      if (reintentoActual < maxReintentos) {
+        console.log(`Reintentando automáticamente... (${reintentoActual + 1}/${maxReintentos})`);
+        // Esperar 3 segundos antes de reintentar
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        return generarImagen(reintentoActual + 1);
+      }
+      
+      // Si ya agotamos los reintentos, mostrar el error al usuario
       loadingSpinner.classList.remove('active');
       loadingText.classList.remove('active');
       generateBtn.disabled = false;
